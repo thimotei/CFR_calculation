@@ -97,14 +97,16 @@ plot_cfr_basic <- function(){
   # Plot data
   par(mar=c(2,3,1,1))
   xrange <- c(min(data_1$date),max(data_1$date))
+  deaths_plot <- data_1$deaths; deaths_plot[deaths_plot==0] <- 0.1 # Show 0 on log plot
   
   ymax <- 1e6
-  plot(data_1$date,data_1$cases/scaled_reporting,ylab="incidence",type="l",log="y",xlab="",ylim=c(1,ymax),xlim=xrange,lwd=1)
+  plot(data_1$date,data_1$cases/scaled_reporting,ylab="incidence",type="l",log="y",yaxt="n",xlab="",ylim=c(0.1,ymax),xlim=xrange,lwd=1)
   lines(data_1$date,data_1$cases,col="blue",lwd=1)
-  lines(data_1$date,data_1$deaths,col="red",lwd=1)
+  lines(data_1$date,deaths_plot,col="red",lwd=1)
   text(labels="new cases (scaled from traveller data)",x=min(data_1$date),y=0.5*ymax,adj=0,col="blue")
   text(labels="new cases (raw)",x=min(data_1$date),y=0.09*ymax,adj=0)
   text(labels="new deaths (raw)",x=min(data_1$date),y=0.015*ymax,adj=0,col="red")
+  axis(side = 2, at = 10^c(-1:5),labels=c(0,10^c(0:5)))
   title(LETTERS[let_t],adj=0);let_t <- let_t+1
   
   # Plot naive and corrected CFR
