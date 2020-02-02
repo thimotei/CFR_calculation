@@ -75,15 +75,15 @@ plot_cfr_basic <- function(){
 
   write_csv(output_estimates,paste0("plots/cfr_table_scale_",scaled_reporting,"_mean_",meanG,"_",tail(data_1,1)$date,".csv"))
   
-  # calculate moving CFR on X day moving window
+  # calculate moving CFR onincidence -- deprecated
   # store_cfr_incidence <- NULL
   # for(tt in 1:nrow(data_1)){
   #   store_cfr_incidence <- rbind(store_cfr_incidence,scale_cfr_incidence(data_1,tt))
   # }
   # store_cfr_incidence <- as_tibble(store_cfr_incidence); names(store_cfr_incidence) <- c("naive","cCFR")
-  # 
+  
   # Plot calculations
-  par(mfrow=c(2,2),mar=c(3,3,1,1),mgp=c(2,0.7,0))
+  par(mfrow=c(3,1),mar=c(3,3,1,1),mgp=c(2,0.7,0))
   
   # Plot delay
   seq_xx <- seq(0,20,1)
@@ -100,20 +100,25 @@ plot_cfr_basic <- function(){
   deaths_plot <- data_1$deaths; deaths_plot[deaths_plot==0] <- 0.1 # Show 0 on log plot
   
   ymax <- 1e6
-  plot(data_1$date,data_1$cases/scaled_reporting,ylab="incidence",type="l",log="y",yaxt="n",xlab="",ylim=c(0.1,ymax),xlim=xrange,lwd=1)
+  plot(data_1$date,data_1$cases/scaled_reporting,ylab="incidence",type="l",log="y",yaxt="n",xlab="",ylim=c(0.1,ymax),xlim=xrange,lwd=1,col="white")
+  polygon(c(cfr_current_date,cfr_max_date,cfr_max_date,cfr_current_date),c(0.1,0.1,ymax,ymax),col="light grey",border=0)
   lines(data_1$date,data_1$cases,col="blue",lwd=1)
   lines(data_1$date,deaths_plot,col="red",lwd=1)
+  lines(data_1$date,data_1$cases/scaled_reporting,col="black",lwd=1)
   text(labels="new cases (scaled from traveller data)",x=min(data_1$date),y=0.5*ymax,adj=0,col="blue")
   text(labels="new cases (raw)",x=min(data_1$date),y=0.09*ymax,adj=0)
   text(labels="new deaths (raw)",x=min(data_1$date),y=0.015*ymax,adj=0,col="red")
+  text(labels="extrapolation",x=max(data_1$date)-1,y=1,adj=1,col=rgb(0.3,0.3,0.3))
   axis(side = 2, at = 10^c(-1:5),labels=c(0,10^c(0:5)))
   title(LETTERS[let_t],adj=0);let_t <- let_t+1
   
   # Plot naive and corrected CFR
-  ymax <- 15
+  ymax <- 5
   plot(data_1$date,store_cfr$naive,col="white",ylab=paste0("CFR (%)"),xlab="",xlim=xrange,ylim=c(0,ymax))
   data_c2 <- data_1[data_1$date>=cfr_from_date,]  # Only display recent more robust points 
   store_cfr_2 <- store_cfr[data_1$date>=cfr_from_date,]
+  polygon(c(cfr_current_date,cfr_max_date,cfr_max_date,cfr_current_date),c(0,0,ymax,ymax),col="light grey",border=0)
+  
   grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
   
   lines(data_c2$date,100*store_cfr_2$naive,col="blue",lty=2,lwd=1)
@@ -123,23 +128,25 @@ plot_cfr_basic <- function(){
   text(labels="naive CFR from traveller data (dashed)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")
   text(labels="naive CFR from raw data",x=min(data_1$date),y=0.7*ymax,adj=0,col="black")
   
+
   title(LETTERS[let_t],adj=0);let_t <- let_t+1
   
   # Plot naive and corrected severe illness
-  ymax <- 25
-  plot(data_2$date,store_sev$naive,col="white",ylab=paste0("Severe (%)"),xlab="",xlim=xrange,ylim=c(0,ymax))
-  data_s2 <- data_2[data_2$date>=cfr_from_date,]  # Only display recent more robust points 
-  store_sev_2 <- store_sev[data_2$date>=cfr_from_date,]
-  grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
-  
-  lines(data_s2$date,100*store_sev_2$naive,col="blue",lty=2,lwd=1)
-  lines(data_s2$date,100*data_s2$severe_total/data_s2$cumulative_cases,col="black",lty=2,lwd=1) # Use raw data too
-  lines(data_s2$date,100*store_sev_2$cCFR,col="blue",lwd=1)
-  text(labels="corrected severity estimate from traveller data (solid)",x=min(data_1$date),y=0.9*ymax,adj=0,col="blue")
-  text(labels="naive severity from traveller data (dashed)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")
-  text(labels="naive severity from raw data",x=min(data_1$date),y=0.7*ymax,adj=0,col="black")
-  
-  title(LETTERS[let_t],adj=0);let_t <- let_t+1
+  # ymax <- 25
+  # plot(data_2$date,store_sev$naive,col="white",ylab=paste0("Severe (%)"),xlab="",xlim=xrange,ylim=c(0,ymax))
+  # data_s2 <- data_2[data_2$date>=cfr_from_date,]  # Only display recent more robust points 
+  # store_sev_2 <- store_sev[data_2$date>=cfr_from_date,]
+  # polygon(c(cfr_current_date,cfr_max_date,cfr_max_date,cfr_current_date),c(0,0,ymax,ymax),col="light grey",border=0)
+  # grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
+  # 
+  # lines(data_s2$date,100*store_sev_2$naive,col="blue",lty=2,lwd=1)
+  # lines(data_s2$date,100*data_s2$severe_total/data_s2$cumulative_cases,col="black",lty=2,lwd=1) # Use raw data too
+  # lines(data_s2$date,100*store_sev_2$cCFR,col="blue",lwd=1)
+  # text(labels="corrected severity estimate from traveller data (solid)",x=min(data_1$date),y=0.9*ymax,adj=0,col="blue")
+  # text(labels="naive severity from traveller data (dashed)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")
+  # text(labels="naive severity from raw data",x=min(data_1$date),y=0.7*ymax,adj=0,col="black")
+  # 
+  # title(LETTERS[let_t],adj=0);let_t <- let_t+1
   
   # Plot naive and corrected CFR - by incidence --  DEPRECATED
   # ymax <- 1
@@ -147,7 +154,8 @@ plot_cfr_basic <- function(){
   # lines(data_1$date,store_cfr_incidence$cCFR,col="blue")
   # text(labels="corrected CFR estimate (solid)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")
   # 
-  dev.copy(png,paste0("plots/cfr_estimate_scale_",scaled_reporting,"_mean_",meanG,"_",tail(data_1,1)$date,".png"),units="cm",width=25,height=15,res=150)
+  dev.copy(png,paste0("plots/cfr_estimate_scale_",scaled_reporting,"_mean_",meanG,"_",tail(data_1,1)$date,".png"),
+           units="cm",width=10,height=15,res=150)
   dev.off()
   
 
