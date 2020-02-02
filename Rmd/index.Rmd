@@ -1,0 +1,38 @@
+---
+title: "Estimating the case fatality rate of 2019-nCoV"
+output:
+  html_document: default
+  pdf_document: default
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+*Contributors: Tim Russell, CMMID nCoV working group, Adam Kucharski.*
+
+*Note: this is preliminary analysis and has not yet been peer-reviewed.*
+
+## Aim
+
+To estimate the case fatality rate for nCoV based on available data on cases and deaths
+
+## Methods summary
+
+• We used the same method as for the Ebola Lancet piece, which estimated a corrected CFR rather than using a naive cases/deaths calculation. As a starting point we assumed a 13.1 day onset-to-death for nCoV (onset-to-hospitalisation for recent cases was 9.1 days in the Li et al NEJM paper, then we added 4 days to this). Distribution shown in Figure 1A.
+
+• We only have decent total incidence estimates from 16th Jan onwards (Figure 2B), so if the delay is 12 days, we're now just getting to the point where we can calculate outcomes from this period (because otherwise the death outcomes will include cases prior to 16th Jan). 
+
+• The 'corrected CFR' based on the raw counts was implausibly large because there have been a hundred or so deaths in the past week, but there were only a couple of hundred cumulative cases 12 days ago (when these deaths would have had onset on average).
+
+• So instead we looked at estimated CFR when case numbers are scaled up based on our relative reported estimates from Wuhan = factor of ~65 (for comparison, the Wu et al Lancet analysis produced a factor of ~100). We assumed all deaths were reported as in the raw data.
+
+## Key results
+
+• **Using case data scaled for reporting compared to that for exported cases, we obtained an adjusted CFR estimate that was declining as more data came in, with most recent cCFR estimate of 2.2 (95% CI: 1.9-2.6) (Figure 1C, solid blue line).**. Note: CFR estimates only shown from 26th Jan onwards, as there are very few count data to base the estimation on before this.
+
+```{r fig_inference, echo=FALSE, fig.align='center', fig.cap="_Figure 1: Case fatality estimate. A) Assumed distribution of onset-to-death in cases with fatal outcomes. B) Incidence of new cases, new deaths and cases adjusted based on scaling factor estimated from exported cases. C) Estimate CFR using raw data and a naive calculation; traveller scaled data and naive calculation; traveller scaled data and a corrected calculation_", out.width = '40%'}
+knitr::include_graphics("../plots/cfr_estimate_scale_65_mean_13.1_2020-01-30.png")
+```
