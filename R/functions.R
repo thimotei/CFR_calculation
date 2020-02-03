@@ -21,11 +21,12 @@ bin_conf <- function(x,n){
 
 # Plot native CFR ---------------------------------------------------------
 
-plot_cfr_basic <- function(){
+plot_cfr_basic <- function(main_data_in){
   
   # Load data and omit initial missing entries
-  data_1 <- all_dat[!is.na(all_dat$cases),] 
-  data_1$cases <- scaled_reporting*data_1$cases # scale up based on exported case estimates
+  data_1 <- main_data_in[!is.na(main_data_in$new_cases_china),] 
+  data_1 <- data_1 %>% mutate(cases = scaled_reporting*new_cases_china,
+                              deaths = new_deaths_china) # scale up based on exported case estimates
 
   # - - 
   # Estimate fatality risk
@@ -49,8 +50,10 @@ plot_cfr_basic <- function(){
   
   # Calculate adjusted severity risk
   mov_window <- distn_needed
-  data_2 <- data_1; data_2$deaths <- data_2$severe_new # swap argument for easier function pass
-  data_2 <- data_2[!is.na(data_2$deaths),] 
+  data_2 <- data_1; 
+  data_2 <- data_2 %>% mutate(cases = new_cases_china,
+                              deaths = new_sev_cases_china) # scale up based on exported case estimates
+  data_2 <- data_2[!is.na(data_2$new_sev_cases_china),]# omit NAs
   
   store_sev <- NULL
   for(tt in 1:nrow(data_2)){
@@ -63,8 +66,8 @@ plot_cfr_basic <- function(){
   # Calculate final CI and output
   tt_max <- nrow(data_1)
   
-  CI_nCFR_raw <- c.input.text(bin_conf(data_1[tt_max,]$cumulative_deaths,data_1[tt_max,]$cumulative_cases))
-  CI_nCFR <- c.input.text(bin_conf(store_cfr[tt_max,]$deaths,store_cfr[tt_max,]$cases))
+  CI_nCFR_raw <- c.input.text(bin_conf(data_1[tt_max,]$cumulative_deaths_china,data_1[tt_max,]$cumulative_cases_china))
+  CI_nCFR <- c.input.text(bin_conf(data_1[tt_max,]$cumulative_deaths_china,scaled_reporting*data_1[tt_max,]$cumulative_cases_china))
   CI_cCFR <- c.input.text(bin_conf(store_cfr[tt_max,]$deaths,store_cfr[tt_max,]$known_outcomes))
   
   output_estimates <- rbind(c("Naive CFR (raw data)",CI_nCFR_raw),
@@ -122,7 +125,7 @@ plot_cfr_basic <- function(){
   grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
   
   lines(data_c2$date,100*store_cfr_2$naive,col="blue",lty=2,lwd=1)
-  lines(data_c2$date,100*data_c2$naive_cfr,col="black",lty=2,lwd=1) # Use raw data too
+  lines(data_c2$date,100*data_c2$cumulative_deaths_china/data_c2$cumulative_cases_china,col="black",lty=2,lwd=1) # Use raw data too
   lines(data_c2$date,100*store_cfr_2$cCFR,col="blue",lwd=1)
   text(labels="corrected CFR estimate from traveller data (solid)",x=min(data_1$date),y=0.9*ymax,adj=0,col="blue")
   text(labels="naive CFR from traveller data (dashed)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")

@@ -1,3 +1,1 @@
 Have interpolated 2020-01-22. Function is:  =ROUND(C13*(C13/C12+C16/C15)/2,0)
-
-2020-02-02 is preliminary
