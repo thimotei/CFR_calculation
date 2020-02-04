@@ -24,10 +24,16 @@ bin_conf <- function(x,n){
 plot_cfr_basic <- function(main_data_in){
   
   # Load data and omit initial missing entries
-  data_1 <- main_data_in[!is.na(main_data_in$new_cases_china),] 
-  data_1 <- data_1 %>% mutate(cases = scaled_reporting*new_cases_china,
-                              deaths = new_deaths_china) # scale up based on exported case estimates
+  data_1 <- main_data_in[!is.na(main_data_in$new_cases_outside),] 
+  data_1 <- data_1 %>% mutate(cases = scaled_reporting*new_cases_outside,
+                              deaths = new_deaths_outside) # scale up based on exported case estimates
 
+  # SPECIFY WHETHER CHINA OR OUTSIDE
+  #data_1 <- main_data_in[!is.na(main_data_in$new_cases_china),] 
+  #data_1 <- data_1 %>% mutate(cases = scaled_reporting*new_cases_china,
+  #                            deaths = new_deaths_china) # scale up based on exported case estimates
+  
+  
   # - - 
   # Estimate fatality risk
   
@@ -38,7 +44,7 @@ plot_cfr_basic <- function(main_data_in){
   mov_window <- distn_needed
   store_cfr <- NULL
   for(tt in 1:nrow(data_1)){
-    store_cfr <- rbind(store_cfr,scale_cfr(data_1[max(0,tt-mov_window):tt,],delay_fun = onset_to_death))
+    store_cfr <- rbind(store_cfr,scale_cfr(data_1[1:tt,],delay_fun = onset_to_death))
   }
   store_cfr <- as_tibble(store_cfr); names(store_cfr) <- c("naive","cCFR","deaths","known_outcomes","cases")
 
@@ -57,7 +63,7 @@ plot_cfr_basic <- function(main_data_in){
   
   store_sev <- NULL
   for(tt in 1:nrow(data_2)){
-    store_sev <- rbind(store_sev,scale_cfr(data_2[max(0,tt-mov_window):tt,],delay_fun = onset_to_hosp))
+    store_sev <- rbind(store_sev,scale_cfr(data_2[1:tt,],delay_fun = onset_to_hosp))
   }
   store_sev <- as_tibble(store_sev); names(store_sev) <- c("naive","cCFR","severe","known_outcomes","cases")
   
@@ -76,7 +82,7 @@ plot_cfr_basic <- function(main_data_in){
   output_estimates <- as_tibble(output_estimates)
   names(output_estimates) <- c("Data/method","Estimate")
 
-  write_csv(output_estimates,paste0("plots/cfr_table_scale_",scaled_reporting,"_mean_",meanG,"_",tail(data_1,1)$date,".csv"))
+  write_csv(output_estimates,paste0("plots/cfr_table_scale_",scaled_reporting,"_extrapo_",extrapolate_use_days,"_",tail(data_1,1)$date,".csv"))
   
   # calculate moving CFR onincidence -- deprecated
   # store_cfr_incidence <- NULL
@@ -116,7 +122,7 @@ plot_cfr_basic <- function(main_data_in){
   title(LETTERS[let_t],adj=0);let_t <- let_t+1
   
   # Plot naive and corrected CFR
-  ymax <- 5
+  ymax <- 10
   plot(data_1$date,store_cfr$naive,col="white",ylab=paste0("CFR (%)"),xlab="",xlim=xrange,ylim=c(0,ymax))
   data_c2 <- data_1[data_1$date>=cfr_from_date,]  # Only display recent more robust points 
   store_cfr_2 <- store_cfr[data_1$date>=cfr_from_date,]
@@ -157,7 +163,7 @@ plot_cfr_basic <- function(main_data_in){
   # lines(data_1$date,store_cfr_incidence$cCFR,col="blue")
   # text(labels="corrected CFR estimate (solid)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")
   # 
-  dev.copy(png,paste0("plots/cfr_estimate_scale_",scaled_reporting,"_mean_",meanG,"_",tail(data_1,1)$date,".png"),
+  dev.copy(png,paste0("plots/cfr_estimate_scale_",scaled_reporting,"_extrapo_",extrapolate_use_days,"_",tail(data_1,1)$date,".png"),
            units="cm",width=10,height=15,res=150)
   dev.off()
   
