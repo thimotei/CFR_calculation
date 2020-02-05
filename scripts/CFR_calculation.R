@@ -19,7 +19,7 @@ source("R/format_data.R")
 
 # NOTE: Currently looking at date of confirmation. So actual delay may be lower?
 
-meanG <- 13.8 - 6.1
+meanG <- 13.8 - 5.1 # subtract delay from onset-to-confirmation
 scaleG <- 1
 onset_to_death <- function(x){ dgamma(x, meanG/scaleG, scale = scaleG) }
 
