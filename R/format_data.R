@@ -4,26 +4,19 @@
 # Load case & death timeseries
 # NOTE: currently stratify by within/outside China
 
-all_dat <- read_csv("~/repos/CFR_calculation/data/case_death_data_WHO.csv")
+all_dat <- read_csv("~/Documents/lshtm/github repos/CFR_calculation/data/case_death_data_WHO.csv")
 
 # loading inferred infection data from Wuhan outbreak model
 
 start_date <- as.Date("2019-11-22") # first case
-end_date <- as.Date("2020-02-") # period to forecast ahead
-t_period <- as.numeric(end_date-start_date)+1
+end_date <- as.Date("2020-03-01") # period to forecast ahead
+t_period <- as.numeric(end_date-start_date)
 
-inferred_data_wuhan <- load("../stoch_model/outputs/bootstrap_fit_1.RData")
-inferred_infection_data = I_plot[,!is.na(I_plot[t_period,])]
+load("~/Documents/lshtm/github repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
 
-# calculating rolling mean of the infection trajectories I(t) from the Wuhan outbreak model
-
-inferred_infection_average <- NULL
-for(j in 1:90)
-  for(i in 1:100)
-  {
-    inferred_infection_average[i] <- mean(inferred_infection_data[i,j])
-  }
-
+incidenceAtT <- diff(C_local_plot)
+incidenceAtTDF <- data.frame(incidenceAtT)
+incidenceAtTDFNoNA <- incidenceAtTDF %>% select_if(~sum(!is.na(.)) > 0)
 
 # Add extra columns
 all_dat <- all_dat %>% mutate(cumulative_cases_china = (cumulative_cases_global - cumulative_cases_outside),
