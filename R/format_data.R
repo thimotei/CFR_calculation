@@ -4,19 +4,32 @@
 # Load case & death timeseries
 # NOTE: currently stratify by within/outside China
 
-all_dat <- read_csv("~/Documents/lshtm/github repos/CFR_calculation/data/case_death_data_WHO.csv")
+all_dat <- read_csv("~/repos/CFR_calculation/data/case_death_data_WHO.csv")
 
 # loading inferred infection data from Wuhan outbreak model
 
 start_date <- as.Date("2019-11-22") # first case
 end_date <- as.Date("2020-03-01") # period to forecast ahead
-t_period <- as.numeric(end_date-start_date)
+end_date_minus_1 <- as.Date("2020-02-29") # period to forecast ahead
+t_period <- as.numeric(end_date-start_date) # for numerical use of the time difference
+date_range <- seq(start_date,end_date,1) # creating a vector the time range for plots etc
+date_range_minus_1 <- seq(start_date,end_date_minus_1,1) # creating a vector the time range for plots etc
 
-load("~/Documents/lshtm/github repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
+load("~/repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
 
+prevalence <- C_local_plot
 incidenceAtT <- diff(C_local_plot)
 incidenceAtTDF <- data.frame(incidenceAtT)
-incidenceAtTDFNoNA <- incidenceAtTDF %>% select_if(~sum(!is.na(.)) > 0)
+incidenceAtTDFMeans <- rowMeans(incidenceAtTDF, na.rm = TRUE)
+prevalenceMean <- rowMeans(prevalence, na.rm = TRUE)
+cumulativePrevalence <- cumsum(prevalenceMean)
+
+### plotting the data for a sanity check ### 
+
+plot(x = date_range_minus_1 , y = incidenceAtTDFMeans, xlab = "Date", ylab = "Incidence of Covid-19 in Wuhan")
+plot(x = date_range, y = incidenceCumulative, xlab = "Date", ylab = "Prevalence of Covid-19 in Wuhan")
+plot(x = date_range, y = cumulativePrevalence, xlab = "Date", ylab = "Cumulative cases of Covid-19 in Wuhan")
+
 
 # Add extra columns
 all_dat <- all_dat %>% mutate(cumulative_cases_china = (cumulative_cases_global - cumulative_cases_outside),
