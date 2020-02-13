@@ -1,5 +1,39 @@
 library(dplyr)
+library(tidyverse)
 library(magrittr)
+
+# Format CI text ------------------------------------------------
+
+c.text<-function(x,sigF=3){
+  bp1=signif(c(median(x),quantile(x,0.025),quantile(x,0.975)),sigF)
+  paste(bp1[1]," (",bp1[2],"-",bp1[3],")",sep="")
+}
+
+c.input.text<-function(bp1,sigF=3){
+  bp1 <- signif(100*bp1,sigF)
+  paste(bp1[1]," (",bp1[2],"-",bp1[3],")",sep="")
+}
+
+############# setting up date ranges #################
+
+
+start_date <- as.Date("2019-11-22") # first case
+end_date <- as.Date("2020-03-01") # period to forecast ahead
+end_date_minus_1 <- as.Date("2020-02-29") # period to forecast ahead
+t_period <- as.numeric(end_date - start_date) # for numerical use of the time difference
+date_range <- seq(start_date, end_date,1) # creating a vector the time range for plots etc
+date_range_minus_1 <- seq(start_date, end_date_minus_1,1) # creating a vector the time range for plots etc
+
+
+# Calculation binomial CIs ------------------------------------------------
+
+
+bin_conf <- function(x,n){
+  htest <- binom.test(x,n)
+  h_out <- c(x/n, htest$conf.int[1], htest$conf.int[2])
+  h_out
+}
+
 
 ######### read in data ##############
 
@@ -11,14 +45,17 @@ load("~/repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
 
 
 cumulativeCaseTimeSeriesWuhan <- data.frame(caseDataRaw$date[caseDataRaw$CNTY_CODE==420100], caseDataRaw$total_case[caseDataRaw$CNTY_CODE==420100])
-cumulativeDeathTimeSeriesWuhan <- data.frame(deathData$date[deathData$CNTY_CODE==420100],  Data$fatality[deathData$CNTY_CODE==420100])
-cumulativeDeathTimeSeriesWuhanTime <- subset(cumulativeDeathTimeSeriesWuhan, date >= cumulativeCaseTimeSeriesWuhan[1,1])
+cumulativeDeathTimeSeriesWuhan <- data.frame(deathDataRaw$date[deathDataRaw$CNTY_CODE==420100],  deathDataRaw$fatality[deathDataRaw$CNTY_CODE==420100])
 
 colnames(cumulativeCaseTimeSeriesWuhan)[1] <-"date"
 colnames(cumulativeCaseTimeSeriesWuhan)[2] <-"case_incidence"
 
+cumulativeCaseTimeSeriesWuhan <- cumulativeCaseTimeSeriesWuhan[1:nrow(cumulativeCaseTimeSeriesWuhan) - 1,]
+
 colnames(cumulativeDeathTimeSeriesWuhan)[1] <-"date"
 colnames(cumulativeDeathTimeSeriesWuhan)[2] <-"death_incidence"
+
+cumulativeDeathTimeSeriesWuhanTime <- subset(cumulativeDeathTimeSeriesWuhan, date >= cumulativeCaseTimeSeriesWuhan[1,1])
 
 # adding missing row of case data
 
@@ -27,24 +64,46 @@ tmp <- rbind(cumulativeCaseTimeSeriesWuhan, missingRow)
 cumulativeCaseTimeSeriesWuhan <- tmp[order(as.Date(tmp$date, format="%Y/%m/%d")),]
 
 
-incidenceAtT <- diff(C_local_plot)
+incidenceAtT <- diff(I_plot)
 incidenceAtTDF <- data.frame(incidenceAtT)
 cumulativeCaseTimeSeriesWuhanInferred <-rowMeans(incidenceAtTDF, na.rm = TRUE)
+cumulativeCaseTimeSeriesWuhanInferredTime <- data.frame(date = date_range_minus_1,
+                                                        cases_inferred = cumulativeCaseTimeSeriesWuhanInferred)
+
 
 caseDeathIncidenceTogether <- data.frame(date = cumulativeDeathTimeSeriesWuhanTime$date,
                                          case_incidence = cumulativeCaseTimeSeriesWuhan$case_incidence,
                                          death_incidence =cumulativeDeathTimeSeriesWuhanTime$death_incidence)
 
 
+tmp2 <-  data.frame(new_cases = diff(caseDeathIncidenceTogether$case_incidence),new_deaths = diff(caseDeathIncidenceTogether$death_incidence))
+allDataTogether <- cbind(caseDeathIncidenceTogether[2:28,1:3], tmp2)
 
 
-######### define date range of interest ##
+tmp <- rowMeans(data.frame(diff(C_local_plot)),na.rm=TRUE)
+inferredTimeSeries <- data.frame(date = date_range_minus_1, new_cases = tmp)
+inferredTimeSeriesRelevant <- subset(inferredTimeSeries, head(allDataTogether$date, n = 1) <= date & date <= tail(allDataTogether$date, n = 1))
 
-start_date <- as.Date("2019-11-22") # first case
-end_date <- as.Date("2020-03-01") # period to forecast ahead
-end_date_minus_1 <- as.Date("2020-02-29") # period to forecast ahead
-t_period <- as.numeric(end_date-start_date) # for numerical use of the time difference
-date_range <- seq(start_date,end_date_minus_1,1) # creating a vector the time range for plots etc
+inferredTimeSeriesIncidence <- data.frame(date = date_range, new_cases = rowMeans(data.frame(C_local_plot),na.rm=TRUE))
+inferredTimeSeriesIncidenceRelevant <- subset(inferredTimeSeriesIncidence, head(allDataTogether$date, n = 1) <= date & date <= tail(allDataTogether$date, n = 1))
+
+death_incidence = cumulativeDeathTimeSeriesWuhanTime$death_incidence
+case_incidence = rowMeans(data.frame(C_local_plot),na.rm=TRUE)
+
+allDataTogetherInferred <- data.frame(date = inferredTimeSeriesRelevant$date,
+                                      case_incidence = round(inferredTimeSeriesIncidenceRelevant$new_cases),
+                                      death_incidence = cumulativeDeathTimeSeriesWuhanTime[2:28,]$death_incidence,
+                                      new_cases = round(inferredTimeSeriesRelevant$new_cases), 
+                                      new_deaths = diff(caseDeathIncidenceTogether$death_incidence))
+
+
+write.csv(caseDeathIncidenceTogether, "CFR_data.csv", row.names = FALSE)
+
+
+
+write.csv(cumulativeCaseTimeSeriesWuhanInferred, "incidence_inferred_data.csv", row.names = FALSE)
+
+
 
 ######### parameterising the delay distributions (taken from papers) ############
 
@@ -55,7 +114,7 @@ onset_to_death <- function(x){ dgamma(x, meanG/scaleG, scale = scaleG) }
 meanH <- 9.1
 scaleH <- 1
 onset_to_hosp <- function(x){ dgamma(x, meanH/scaleH, scale = scaleH) }
-
+scaled_reporting <- 1
 
 ########## computing the scaling factor for the corrected CFR
 
@@ -89,9 +148,6 @@ scale_cfr <- function(data_1_in,delay_fun){
   
 }
 
-tmp2 <-  data.frame(new_cases = diff(caseDeathIncidenceTogether$case_incidence),new_deaths = diff(caseDeathIncidenceTogether$death_incidence))
-allDataTogether <- cbind(caseDeathIncidenceTogether[2:28,1:3], tmp2)
-
 
 
 
@@ -119,12 +175,13 @@ output_estimates <- function(main_data_in){
   mov_window <- distn_needed
   store_cfr <- NULL
   for(tt in 1:nrow(data_1)){
-    store_cfr <- rbind(store_cfr,scale_cfr(data_1[1:tt,],delay_fun = onset_to_death))
+    store_cfr <- rbind(store_cfr,scale_cfr(data_1[1:tt,],delay_fun = onset_to_hosp))
   }
 
   
   
   store_cfr <- as_tibble(store_cfr); names(store_cfr) <- c("naive","cCFR","deaths","known_outcomes","cases")
+  
   
   #Estimate severity risk
   
@@ -133,6 +190,7 @@ output_estimates <- function(main_data_in){
   
   # Calculate adjusted severity risk
   mov_window <- distn_needed
+  
   #data_2 <- data_1; 
   #data_2 <- data_2 %>% mutate(cases = new_cases_china,
   #                            deaths = new_sev_cases_china) # scale up based on exported case estimates
@@ -158,20 +216,13 @@ output_estimates <- function(main_data_in){
   output_estimate_data <- rbind(c("Naive CFR (raw data)",CI_nCFR_raw),
                             c("Naive CFR (scaled data)",CI_nCFR),
                             c("Adjusted CFR (scaled data)",CI_cCFR))
+  
   output_estimate_data <- as_tibble(output_estimate_data)
   names(output_estimate_data) <- c("Data/method","Estimate")
   
+  write_csv(output_estimate_data,paste0("~/cfr_table_scale_",scaled_reporting,"_",tail(data_1,1)$date,".csv"))
   
-  
-  write_csv(output_estimate_data,paste0("plots/cfr_table_scale_",scaled_reporting,"_extrapo_",extrapolate_use_days,"_",tail(data_1,1)$date,".csv"))
+  return(store_cfr)
   
 }
-
-mean_onset_to_death <- 22.3
-
-death_future_date <- as.Date(Sys.Date()) + mean_onset_to_death
-death_past_date <- as.Date(end_date) - mean_onset_to_death
-
-
-
   
