@@ -1,0 +1,4 @@
+Data/method,Estimate
+Naive CFR (raw data),0.0528 (0.0459-0.0604)
+Naive CFR (scaled data),0.0528 (0.0459-0.0604)
+Adjusted CFR (scaled data),0.195 (0.169-0.223)

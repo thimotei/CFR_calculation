@@ -24,9 +24,11 @@ bin_conf <- function(x,n){
 plot_cfr_basic <- function(main_data_in){
   
   # Load data and omit initial missing entries
+  # main_data_in <- all_dat
+  
   data_1 <- main_data_in[!is.na(main_data_in$new_cases_outside),] 
-  data_1 <- data_1 %>% mutate(cases = scaled_reporting*new_cases_outside,
-                              deaths = new_deaths_outside) # scale up based on exported case estimates
+  data_1 <- data_1 %>% mutate(cases = new_cases_china,
+                              deaths = new_deaths_china) # scale up based on exported case estimates
 
   # SPECIFY WHETHER CHINA OR OUTSIDE
   #data_1 <- main_data_in[!is.na(main_data_in$new_cases_china),] 
@@ -111,21 +113,21 @@ plot_cfr_basic <- function(main_data_in){
   ymax <- 1e6
   plot(data_1$date,data_1$cases/scaled_reporting,ylab="incidence",type="l",log="y",yaxt="n",xlab="",ylim=c(0.1,ymax),xlim=xrange,lwd=1,col="white")
   polygon(c(cfr_current_date,cfr_max_date,cfr_max_date,cfr_current_date),c(0.1,0.1,ymax,ymax),col="light grey",border=0)
-  lines(data_1$date,data_1$cases,col="blue",lwd=1)
+  #lines(data_1$date,data_1$cases,col="blue",lwd=1)
   lines(data_1$date,deaths_plot,col="red",lwd=1)
   lines(data_1$date,data_1$cases/scaled_reporting,col="black",lwd=1)
-  text(labels="new cases (scaled from traveller data)",x=min(data_1$date),y=0.5*ymax,adj=0,col="blue")
-  text(labels="new cases (raw)",x=min(data_1$date),y=0.09*ymax,adj=0)
+  #text(labels="new cases (scaled from traveller data)",x=min(data_1$date),y=0.5*ymax,adj=0,col="blue")
+  text(labels="new cases (model)",x=min(data_1$date),y=0.09*ymax,adj=0)
   text(labels="new deaths (raw)",x=min(data_1$date),y=0.015*ymax,adj=0,col="red")
-  text(labels="extrapolation",x=max(data_1$date)-1,y=1,adj=1,col=rgb(0.3,0.3,0.3))
+  #text(labels="extrapolation",x=max(data_1$date)-1,y=1,adj=1,col=rgb(0.3,0.3,0.3))
   axis(side = 2, at = 10^c(-1:5),labels=c(0,10^c(0:5)))
   title(LETTERS[let_t],adj=0);let_t <- let_t+1
   
   # Plot naive and corrected CFR
-  ymax <- 10
+  ymax <- 1
   plot(data_1$date,store_cfr$naive,col="white",ylab=paste0("CFR (%)"),xlab="",xlim=xrange,ylim=c(0,ymax))
-  data_c2 <- data_1[data_1$date>=cfr_from_date,]  # Only display recent more robust points 
-  store_cfr_2 <- store_cfr[data_1$date>=cfr_from_date,]
+  data_c2 <- data_1#[data_1$date>=cfr_from_date,]  # Only display recent more robust points 
+  store_cfr_2 <- store_cfr#[data_1$date>=cfr_from_date,]
   polygon(c(cfr_current_date,cfr_max_date,cfr_max_date,cfr_current_date),c(0,0,ymax,ymax),col="light grey",border=0)
   
   grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
@@ -133,9 +135,9 @@ plot_cfr_basic <- function(main_data_in){
   lines(data_c2$date,100*store_cfr_2$naive,col="blue",lty=2,lwd=1)
   lines(data_c2$date,100*data_c2$cumulative_deaths_china/data_c2$cumulative_cases_china,col="black",lty=2,lwd=1) # Use raw data too
   lines(data_c2$date,100*store_cfr_2$cCFR,col="blue",lwd=1)
-  text(labels="corrected CFR estimate from traveller data (solid)",x=min(data_1$date),y=0.9*ymax,adj=0,col="blue")
-  text(labels="naive CFR from traveller data (dashed)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")
-  text(labels="naive CFR from raw data",x=min(data_1$date),y=0.7*ymax,adj=0,col="black")
+  text(labels="corrected CFR estimate (solid)",x=min(data_1$date),y=0.9*ymax,adj=0,col="blue")
+  #text(labels="naive CFR (dashed)",x=min(data_1$date),y=0.8*ymax,adj=0,col="blue")
+  text(labels="naive CFR",x=min(data_1$date),y=0.8*ymax,adj=0,col="black")
   
 
   title(LETTERS[let_t],adj=0);let_t <- let_t+1
