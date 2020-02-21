@@ -2,11 +2,14 @@
 ## Always use relative paths and if for some reason (i.e private data) need paths outside
 ## Current repo makes this very clear at the top of the script
 
+## These are bad - I can't run this code because of them.
 caseDataRaw <- readRDS("~/Documents/lshtm/nCoV2019/case_data/hubei_confirmed.rds")
 deathDataRaw <- readRDS("~/Documents/lshtm/nCoV2019/case_data/all_death_prf.rds")
 load("~/Documents/lshtm/github repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
-internationalDataRaw <-  data.frame(read.csv("~/Documents/lshtm/cfr_V2/data/international_cases_deaths.csv"))
-cruiseShipDataRaw <-  data.frame(read.csv("~/Documents/lshtm/cfr_V2/data/cruise_ship_diamond_princess_by_confirmation.csv"))
+
+## These are relative paths so good!
+internationalDataRaw <-  data.frame(read.csv("data/international_cases_deaths.csv"))
+cruiseShipDataRaw <-  data.frame(read.csv("data/cruise_ship_diamond_princess_by_confirmation.csv"))
 christiansData <- read.csv("data/ncov_cases_20200217.csv")
 
 
@@ -15,11 +18,7 @@ internationalDataRaw$date <- as.Date(internationalDataRaw$date)
 cruiseShipDataRaw$date <- as.Date(cruiseShipDataRaw$date)
 christiansData$date <- as.Date(christiansData$date)
 
-#earlyOutbreak <- data.frame(read.csv("~/Documents/lshtm/CFR/data/early_outbreak.csv"), row.names = NULL)
-
 inferredDataIncidence <- read.csv("data/case_model.csv")
-#inferredDataIncidence <- data.frame(date = inferredDataCumulative$date[2:nrow(inferredDataCumulative)],
-#                                    new_cases = diff(inferredDataCumulative$cases))
 
 realCaseDataCumulative <- data.frame(date = caseDataRaw$date[caseDataRaw$CNTY_CODE==420100], 
                                      cases = caseDataRaw$total_case[caseDataRaw$CNTY_CODE==420100])
