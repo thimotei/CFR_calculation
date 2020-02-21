@@ -1,3 +1,7 @@
+## In general using complete paths is bad practice
+## Always use relative paths and if for some reason (i.e private data) need paths outside
+## Current repo makes this very clear at the top of the script
+
 caseDataRaw <- readRDS("~/Documents/lshtm/nCoV2019/case_data/hubei_confirmed.rds")
 deathDataRaw <- readRDS("~/Documents/lshtm/nCoV2019/case_data/all_death_prf.rds")
 load("~/Documents/lshtm/github repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
