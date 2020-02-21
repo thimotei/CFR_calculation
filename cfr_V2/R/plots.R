@@ -6,6 +6,7 @@ layout(matrix(c(1, 2),
 
 xSamplesDays <- seq(0,40, 1)
 xSamplesCurve <- seq(0,40, 0.1)
+## Where do these functions come from? 
 samplingFromDelayDistDays <- onset_to_death(xSamplesDays)
 samplingFromDelayDistCurve <- onset_to_death(xSamplesCurve)
 plot(xSamplesDays, samplingFromDelayDistDays, 

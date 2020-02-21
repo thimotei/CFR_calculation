@@ -5,9 +5,10 @@ library(fitdistrplus)
 
 # read in data
 
+## Why is this 1 and not tested. In general global enviornment variables are very bad practice.
 scaled_reporting <- 1.0
 
-source("R/read_dataV2.R")
+source("R/read_data.R")
 
 ######### parameterising the delay distributions (taken from papers) ############
 
@@ -56,12 +57,18 @@ source("R/cCFR_calculation.R")
 
 cCFRTimeSeriesReal <- output_cfr_timeseries(allTogetherReal, onset_to_death)
 cCFRTimeSeriesReal <- cbind(date=dateRangeRealData, cCFRTimeSeriesReal)
-cCFRTimeSeriesRealConstrained <- subset(cCFRTimeSeriesReal, known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
+cCFRTimeSeriesRealConstrained <- subset(cCFRTimeSeriesReal, 
+                                        known_outcomes > deaths & 
+                                          deaths > 0 &
+                                          known_outcomes > 0)
 cfrPointEstimateReal <- output_estimates(allTogetherReal, onset_to_death)
 
 cCFRTimeSeriesInferred <- output_cfr_timeseries(allTogetherInferred, onset_to_death)
 cCFRTimeSeriesInferred <- cbind(date=dateRangeIncidence, cCFRTimeSeriesInferred)
-cCFRTimeSeriesInferredConstrained <- subset(cCFRTimeSeriesInferred, known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
+cCFRTimeSeriesInferredConstrained <- subset(cCFRTimeSeriesInferred, 
+                                            known_outcomes > deaths & 
+                                              deaths > 0 & 
+                                              known_outcomes > 0)
 cCFRPointEstimateInferred <- output_estimates(allTogetherInferred, onset_to_death)
 
 
@@ -73,9 +80,14 @@ cCFRInferredCIs <- calculate_CIs_cCFR(cCFRTimeSeriesInferredConstrained)
 
 # international cases without Diamond princess cruise ship included
 
-cCFRTimeSeriesInternational <- output_cfr_timeseries(internationalDataRaw, confirmation_to_death)
-cCFRTimeSeriesInternational <- cbind(date=internationalDataRaw$date, cCFRTimeSeriesInternational)
-cCFRTimeSeriesInternationalConstrained <- subset(cCFRTimeSeriesInternational, known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
+cCFRTimeSeriesInternational <- output_cfr_timeseries(internationalDataRaw, 
+                                                     confirmation_to_death)
+cCFRTimeSeriesInternational <- cbind(date=internationalDataRaw$date, 
+                                     cCFRTimeSeriesInternational)
+cCFRTimeSeriesInternationalConstrained <- subset(cCFRTimeSeriesInternational, 
+                                                 known_outcomes > deaths & 
+                                                   deaths > 0 &
+                                                   known_outcomes > 0)
 
 nCFRInternationalCIs <- calculate_CIs_nCFR(cCFRTimeSeriesInternationalConstrained)
 cCFRInternationalCIs <- calculate_CIs_cCFR(cCFRTimeSeriesInternationalConstrained)
@@ -97,8 +109,10 @@ internationalCruiseData <- data.frame(date = relevantInternationalSubset$date,
 
 
 
-cCFRTimeSeriesInternationalCruise <- output_cfr_timeseries(internationalCruiseData, confirmation_to_death)
-cCFRTimeSeriesInternationalCruise <- cbind(date=internationalCruiseData$date, cCFRTimeSeriesInternationalCruise)
+cCFRTimeSeriesInternationalCruise <- output_cfr_timeseries(internationalCruiseData, 
+                                                           confirmation_to_death)
+cCFRTimeSeriesInternationalCruise <- cbind(date = internationalCruiseData$date,
+                                           cCFRTimeSeriesInternationalCruise)
 cCFRTimeSeriesInternationalCruiseConstrained <- subset(cCFRTimeSeriesInternationalCruise,
                                                        known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
 #cfrPointEstimateInternational <- output_estimates(cCFRTimeSeriesInternationalConstrained)
