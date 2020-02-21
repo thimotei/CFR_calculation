@@ -305,6 +305,100 @@ par(xpd=TRUE)
 text(internationalCruiseData$date[1] + 0.45 , 3.8, "D", cex = 1.5)
 
 
+
+#### plotting Christian's data
+
+dev.off()
+
+layout(matrix(c(1,
+                2,
+                3),
+              nrow=3, byrow=TRUE))
+
+
+
+
+end4 <- length(nCFRChristianCIs$date) # 
+y4lim <- 20
+
+
+#start4 <- 50
+
+par(mar=c(3,4,1,3),mgp=c(2,0.6,0))
+plotCI(x=nCFRChristianCIs$date[1:end4],
+       y=nCFRChristianCIs$ci_mid[1:end4],
+       li=nCFRChristianCIs$ci_low[1:end4],
+       ui=nCFRChristianCIs$ci_high[1:end4],
+       xlab = "Date",
+       ylab = "CFR (%)", 
+       #yaxt='n',
+       ylim=c(0, y4lim),
+       cex.lab = 1.4,
+       cex.axis = 1.4)
+lines(x = nCFRChristianCIs$date[1:end4], nCFRChristianCIs$ci_mid[1:end4], col = rgb(0.8, 0.2, 0.6))
+grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
+
+par(new=T)
+
+par(mar=c(3,4,1,3),mgp=c(2,0.6,0))
+plotCI(x=cCFRChristianCIs$date[1:end4],
+       y=cCFRChristianCIs$ci_mid[1:end4],
+       li=cCFRChristianCIs$ci_low[1:end4],
+       ui=cCFRChristianCIs$ci_high[1:end4],
+       xlab = "Date",
+       ylab = "CFR (%)",
+       ylim=c(0, y4lim),
+       cex.lab = 1.4,
+       cex.axis = 1.4)
+lines(x = cCFRChristianCIs$date[1:end4], cCFRChristianCIs$ci_mid[1:end4], col = rgb(0.2, 0.8, 0.6))
+#grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
+legend(cCFRChristianCIs$date[11], y4lim, 
+       legend=c("nCFR using Christian's method",
+                "cCFR using Christian's method"), 
+       col=c(rgb(0.8, 0.2, 0.6), rgb(0.2, 0.8, 0.6)),
+       lty=1:1, 
+       cex=1.3)
+par(xpd=TRUE)
+text(cCFRChristianCIs$date[1],18, cex = 2 ,"A")
+
+par(xpd=FALSE)
+plot(x = christiansData$date,
+     christiansData$new_cases, 
+     xlab = "Date",
+     ylab = "Incidence (inferred)", 
+     cex.lab = 1.4,
+     cex.axis = 1.4,
+     ylim = c(0,20))
+lines(x = christiansData$date, christiansData$new_cases, col = "green")
+par(mar=c(3,4,1,3),mgp=c(2,0.6,0))
+grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
+text(allTogetherInferred$date[1], 18, "B")
+
+#mtext(side = 4, line = 3, 'Incidence (real)')
+
+
+par(xpd=FALSE)
+plot(x = christiansData$date, 
+     christiansData$new_deaths,
+     xlab = "Date",
+     ylab="Incidence of deaths",
+     cex.lab = 1.4,
+     cex.axis = 1.4,
+     ylim = c(0,2))
+#title(ylab=, line=-1)
+lines(x = christiansData$date, christiansData$new_deaths, col = "red")
+par(mar=c(3,4,1,3),mgp=c(2,0.6,0))
+grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
+legend(christiansData$date[1], 32500, 
+       legend=c("new cases (in Wuhan)", 
+                "new deaths (in Wuhan)"),
+       col=c("red", "blue"), lty=1:2,
+       cex=1.3)
+par(xpd=TRUE)
+text(christiansData$date[1] , 78, "C")
+
+
+
 #dev.off()
 
 

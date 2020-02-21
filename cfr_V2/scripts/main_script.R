@@ -22,6 +22,16 @@ imperial <- as.numeric(na.omit(imperial))
 fit_imperial <- fitdist(imperial, "gamma")
 
 
+
+shapeLinton = 5.099735
+rateLinton = 0.3386777
+
+linton_dist <- function(x)
+{
+  dgamma(x, shapeLinton, rateLinton)
+}
+
+
 meanG <- 13.8 # subtract delay from onset-to-confirmation
 scaleG <- 1
 
@@ -29,6 +39,7 @@ onset_to_death <- function(x)
 {
   dgamma(x, meanG/scaleG, scale = scaleG)
 }
+
 
 shapeCD = 1.7205
 scaleCD = 9.9827
@@ -124,7 +135,9 @@ christiansData <- read.csv("data/ncov_cases_20200217.csv")
 names(christiansData)[names(christiansData) == "cases"] <- "new_cases"
 names(christiansData)[names(christiansData) == "deaths"] <- "new_deaths"
 
-cCFRTimeSeriesCruise <- output_cfr_timeseries(christiansData, linton_dist)
-cCFRTimeSeriesCruise <- cbind(date=cruiseShipDataRaw$date, cCFRTimeSeriesCruise)
-cCFRTimeSeriesCruiseConstrained <- subset(cCFRTimeSeriesCruise, known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
+cCFRTimeSeriesChristian <- output_cfr_timeseries(christiansData, linton_dist)
+cCFRTimeSeriesChristian <- cbind(date=christiansData$date, cCFRTimeSeriesChristian)
+cCFRTimeSeriesChristianConstrained <- subset(cCFRTimeSeriesChristian, known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
 
+nCFRChristianCIs <- calculate_CIs_nCFR(cCFRTimeSeriesChristianConstrained)
+cCFRChristianCIs <- calculate_CIs_cCFR(cCFRTimeSeriesChristianConstrained)

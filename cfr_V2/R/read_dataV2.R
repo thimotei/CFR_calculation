@@ -3,11 +3,13 @@ deathDataRaw <- readRDS("~/Documents/lshtm/nCoV2019/case_data/all_death_prf.rds"
 load("~/Documents/lshtm/github repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
 internationalDataRaw <-  data.frame(read.csv("~/Documents/lshtm/cfr_V2/data/international_cases_deaths.csv"))
 cruiseShipDataRaw <-  data.frame(read.csv("~/Documents/lshtm/cfr_V2/data/cruise_ship_diamond_princess_by_confirmation.csv"))
+christiansData <- read.csv("data/ncov_cases_20200217.csv")
 
 
 # changing dates from factors to dates
 internationalDataRaw$date <- as.Date(internationalDataRaw$date)
 cruiseShipDataRaw$date <- as.Date(cruiseShipDataRaw$date)
+christiansData$date <- as.Date(christiansData$date)
 
 #earlyOutbreak <- data.frame(read.csv("~/Documents/lshtm/CFR/data/early_outbreak.csv"), row.names = NULL)
 
