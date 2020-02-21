@@ -107,7 +107,24 @@ nCFRInternationalJustCruiseCIs <- calculate_CIs_nCFR(cCFRTimeSeriesCruiseConstra
 cCFRInternationalustCruiseCIs <- calculate_CIs_cCFR(cCFRTimeSeriesCruiseConstrained)
 
 
+# cruise ship cases only
 
+cCFRTimeSeriesCruise <- output_cfr_timeseries(cruiseShipDataRaw, confirmation_to_death)
+cCFRTimeSeriesCruise <- cbind(date=cruiseShipDataRaw$date, cCFRTimeSeriesCruise)
+cCFRTimeSeriesCruiseConstrained <- subset(cCFRTimeSeriesCruise, known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
+#cfrPointEstimateInternational <- output_estimates(cCFRTimeSeriesInternationalConstrained)
 
+nCFRInternationalJustCruiseCIs <- calculate_CIs_nCFR(cCFRTimeSeriesCruiseConstrained)
+cCFRInternationalustCruiseCIs <- calculate_CIs_cCFR(cCFRTimeSeriesCruiseConstrained)
 
+# running Christian's data and distribution as a check
+
+christiansData <- read.csv("data/ncov_cases_20200217.csv")
+
+names(christiansData)[names(christiansData) == "cases"] <- "new_cases"
+names(christiansData)[names(christiansData) == "deaths"] <- "new_deaths"
+
+cCFRTimeSeriesCruise <- output_cfr_timeseries(christiansData, linton_dist)
+cCFRTimeSeriesCruise <- cbind(date=cruiseShipDataRaw$date, cCFRTimeSeriesCruise)
+cCFRTimeSeriesCruiseConstrained <- subset(cCFRTimeSeriesCruise, known_outcomes > deaths & deaths > 0 & known_outcomes > 0)
 

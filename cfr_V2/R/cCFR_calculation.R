@@ -48,7 +48,7 @@ scale_cfr <- function(data_1_in, delay_fun){
   # naive CFR value
   b_tt <- sum(death_incidence)/sum(case_incidence) 
   
-  # nCFR estimator
+  # corrected CFR estimator
   p_tt <- sum(death_incidence)/cumulative_known_t
   
   c(b_tt, p_tt, sum(death_incidence), round(cumulative_known_t), sum(case_incidence))
