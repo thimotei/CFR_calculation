@@ -1,3 +1,6 @@
+## Lack of comments and no list of what this needs make this script a little hard to use 
+## and/or understand. 
+
 dev.off()
 
 layout(matrix(c(1, 2),
@@ -7,6 +10,7 @@ layout(matrix(c(1, 2),
 xSamplesDays <- seq(0,40, 1)
 xSamplesCurve <- seq(0,40, 0.1)
 ## Where do these functions come from? 
+## I see them in main script - not great practice. 
 samplingFromDelayDistDays <- onset_to_death(xSamplesDays)
 samplingFromDelayDistCurve <- onset_to_death(xSamplesCurve)
 plot(xSamplesDays, samplingFromDelayDistDays, 
