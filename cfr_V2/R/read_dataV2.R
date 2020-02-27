@@ -1,9 +1,10 @@
-caseDataRaw <- readRDS("~/Documents/lshtm/nCoV2019/case_data/hubei_confirmed.rds")
-deathDataRaw <- readRDS("~/Documents/lshtm/nCoV2019/case_data/all_death_prf.rds")
-load("~/Documents/lshtm/github repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
-internationalDataRaw <-  data.frame(read.csv("~/Documents/lshtm/cfr_V2/data/international_cases_deaths.csv"))
-cruiseShipDataRaw <-  data.frame(read.csv("~/Documents/lshtm/cfr_V2/data/cruise_ship_diamond_princess_by_confirmation.csv"))
-christiansData <- read.csv("data/ncov_cases_20200217.csv")
+caseDataRaw <- readRDS("~/Dropbox/nCov-2019/data_sources/case_data/hubei_confirmed.rds")
+deathDataRaw <- readRDS("~/Dropbox/nCov-2019/data_sources/case_data/all_death_prf.rds")
+load("~/repos/2020-ncov/stoch_model/outputs/bootstrap_fit_1.RData")
+internationalDataRaw <-  data.frame(read.csv("~/repos/CFR_calculation/cfr_V2/data/international_cases_deaths.csv"))
+cruiseShipDataRaw <-  data.frame(read.csv("~/repos/CFR_calculation/cfr_V2/data/cruise_ship_diamond_princess_by_confirmation.csv"))
+christiansData <- read.csv("~/repos/CFR_calculation/cfr_V2/ncov_cases_20200217.csv")
+
 
 
 # changing dates from factors to dates

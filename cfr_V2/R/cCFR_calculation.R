@@ -168,3 +168,20 @@ calculate_CIs_cCFR <- function(data_1)
 }
 
 
+CFR_with_CIs_main <- function(data_1, delay_dist)
+{
+  
+  dateRange <- seq(as.Date(min(data_1$date)), as.Date(max(data_1$date)), 1)
+  
+  CFRVariablename1 <- as.name(paste0("cCFRRealisticTime_", deparse(substitute(data_1))))
+  CFRVariablename2 <- as.name(paste0("cCFRRealisticTimeConstrained_", deparse(substitute(data_1))))
+  CFRVariablename3 <- as.name(paste0("CFRCIs_", deparse(substitute(data_1))))
+  
+  output_cfr_timeseries(data_1, delay_dist)  -> CFRVariablename1
+  cbind(date = dateRange, CFRVariablename1) -> CFRVariablename1
+  subset(CFRVariablename1, known_outcomes > deaths & deaths > 0 & known_outcomes > 0) -> CFRVariablename2
+  calculate_CIs_cCFR(CFRVariablename2) -> CFRVariablename3
+  
+  return(CFRVariablename3)
+  
+}
