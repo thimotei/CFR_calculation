@@ -16,22 +16,40 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Aim
 
-To accurately estimate the case fatality ratio (CFR) of COVID-19 using multiple available datasets, including the fitted output of [Kucharski et al.](https://www.medrxiv.org/content/10.1101/2020.01.31.20019901v2.full.pdf+html) as a more accurate case incidence data for Wuhan. 
+To estimate the case fatality ratio (CFR) of COVID-19, we used multiple available datasets, including the output of [Kucharski et al.](https://www.medrxiv.org/content/10.1101/2020.01.31.20019901v2.full.pdf+html) that accounted for under-reporting in Wuhan. 
 
 ## Key results
 
-### Summary table of most recent cCFR estimates
+### Diamond Princess Cruise Ship data
+
+We calculated infection and case fatality rate, adjusting for delay from reporting-to-death (assumed to be equivalent to hospitalisation-to-death). Truncated values accounted for right-censoring in the [Linton et al. ](https://www.medrxiv.org/content/10.1101/2020.01.26.20018754v1) dataset. The age distribution of people on the ship is given in Figure 3 below.
+
+| Age Range | cIFR | cCFR | Distribution |
+| ----------- | ----------- | ----------- | ----------- |
+| All ages combined | 0.909% (0.11% - 4.26%) | 1.85% (0.601% - 4.282%) | hospitalisation-to-death non-truncated (Figure 2A) |
+|        |1.18% (0.383% - 2.72%) | 2.30% (0.746% - 5.295%) | hospitalisation-to-death truncated (Figure 2B) |
+
+We also calculated CFR specific to individuals in the 80-89 age group, in which four deaths have been reported. 
+
+| Age Range | cIFR | cCFR | Distribution |
+| ----------- | ----------- | ----------- | ----------- |
+| 80 - 89 | 11.1%  (3.71% - 24.1%) | 21.6% (7.22% - 46.9%) | hospitalisation-to-death non-truncated (Figure 1B) |
+|     | 13.9%  (4.67% - 29.5%) | 27.1% (9.09% - 57.42%) | hospitalisation-to-death truncated (Figure 1B) |
+
+### Summary table of cCFR estimates in Wuhan, outside China, and South Korea
 
 | Dataset | Date of estimate | cCFR | Distribution |
 | ----------- | ----------- | ----------- | ----------- |
-| Wuhan data (inferred) | 11th February | 0.248% (0.231%-0.266%) | onset-to-death non-truncated (Figure 1A) |
-| Wuhan data (inferred) | 11th February | 0.326% (0.304%-0.349%) | onset-to-death truncated (Figure 1B) |
+| Wuhan data (estimated cases) | 11th February | 0.248% (0.231%-0.266%) | onset-to-death non-truncated (Figure 1A) |
+|     |     | 0.326% (0.304%-0.349%) | onset-to-death truncated (Figure 1B) |
 | International data excluding cruise ship | 27th February | 2.27% (1.28%-3.72%) | hospitalisation-to-death non-truncated (Figure 2A) |
-| International data excluding cruise ship | 27th February | 2.89% (1.63%-4.72%) | hospitalisation-to-death truncated (Figure 2B) |
+|     |     | 2.89% (1.63%-4.72%) | hospitalisation-to-death truncated (Figure 2B) |
 | South Korea data | 27th Feburary | 4.11% (2.21%-6.93%) | hospitalisation-to-death (Figure 2B) |
-| South Korea data | 27th Feburary | 5.56% (2.99%-9.31%) | hospitalisation-to-death truncated (Figure 2B) |
+|    |     | 5.56% (2.99%-9.31%) | hospitalisation-to-death truncated (Figure 2B) |
 
 ### Wuhan Data stratified by age range
+
+We adjusted estimates for the age distribution of cases and deaths in Wuhan
 
 | Age Range | cCFR | Distribution |
 | ----------- | ----------- | ----------- |
@@ -48,24 +66,9 @@ To accurately estimate the case fatality ratio (CFR) of COVID-19 using multiple 
 | 80 -    | 1.080%  (0.924%  - 1.250%)  | onset-to-death truncated (Figure 1B) |
 
 
-### Diamond Princess Cruise Ship data
-
-| Age Range | cIFR | cCFR | Distribution |
-| ----------- | ----------- | ----------- | ----------- |
-| All ages combined | 0.909% (0.11% - 4.26%) | 1.85% (0.601% - 4.282%) | hospitalisation-to-death non-truncated (Figure 2A) |
-| All ages combined |1.18% (0.383% - 2.72%) | 2.30% (0.746% - 5.295%) | hospitalisation-to-death truncated (Figure 2B) |
-
-It was only possible to scale the estimates by age group for individuals in the group 80-89, as this was the only group with any deaths. 
-
-| Age Range | cIFR | cCFR | Distribution |
-| ----------- | ----------- | ----------- | ----------- |
-| 80 - 89 | 11.1%  (3.71% - 24.1%) | 21.6% (7.22% - 46.9%) | hospitalisation-to-death non-truncated (Figure 1B) |
-| 80 - 89 | 13.9%  (4.67% - 29.5%) | 27.1% (9.09% - 57.42%) | hospitalisation-to-death truncated (Figure 1B) |
-
-
 ### Table of crude upper bound estimates
 
-We find crude upper bounds for countries without any deaths yet, by finding the total number of recovered individuals and using the rule of three. These estimates are crude approximations and are only within the right area if enough individuals have recovered. Therefore, outside of Singapore where 58 individuals have recovered, we sum up the recovered individuals to get these estimates.
+In countries without any deaths yet, we also estimated crude upper bounds for the CFR by finding the total number of recovered individuals, N, and using the rule of three (i.e. 3/N to give the upper 95% CI). These estimates are crude approximations and are only within the right area if enough individuals have recovered. Therefore, in countries outside of Singapore where no deaths have occurred, we sum up the recovered individuals to get these estimates.
 
 | Country | Recovered | Crude upper bound |
 | ----------- | ----------- | ----------- | 
@@ -102,7 +105,7 @@ knitr::include_graphics("../plots/age_distribution.png")
 
 • However, as the death data is far more reliable, we use the real death time series from within Wuhan within the calculation.
 
-• We use the distributions for confirmation-to-death and onset-to-death taken from [Linton et al. ](https://www.medrxiv.org/content/10.1101/2020.01.26.20018754v1)). They truncate the distributions that they formulate to attempt to counteract the effects of right-censoring, but don't present either as the correct distribution. Therefore, we use both the truncated and non-truncated forms of the distributions and test the sensitivity of the estimates on the distributions.
+• We use the distributions for confirmation-to-death and onset-to-death taken from [Linton et al. ](https://www.medrxiv.org/content/10.1101/2020.01.26.20018754v1). They truncate the distributions that they formulate to attempt to counteract the effects of right-censoring, but don't present either as the correct distribution. Therefore, we use both the truncated and non-truncated forms of the distributions and test the sensitivity of the estimates on the distributions.
 
 • We assume a mean of 14.5 days or 20.2 days from onset-to-death (non-truncated and truncated respectively) for COVID-19 ([Linton et al. ](https://www.medrxiv.org/content/10.1101/2020.01.26.20018754v1)). The onset-to-death distribution is shown in Figure 1.
 
