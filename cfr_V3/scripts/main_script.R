@@ -2,12 +2,13 @@ library(lubridate)
 library(bbmle)
 library(plotrix)
 library(fitdistrplus)
+library(padr)
 
 # read in data
 
 scaled_reporting <- 1.0
 
-source("R/read_dataV2.R")
+source("R/read_data.R")
 
 ######### parameterising the delay distributions (taken from papers) ############
 
@@ -82,5 +83,7 @@ master_plot(JapanData, 1, 1, "top", hospitalisation_to_death_truncated)
 master_plot(KoreaData, 1, 1, "topright", hospitalisation_to_death_truncated)
 master_plot(IranData, 1, 1, "right", hospitalisation_to_death_truncated)
 master_plot(ItalyData, 1, 1, "topright", hospitalisation_to_death_truncated)
-master_plot(, 1, 1, "topright", hospitalisation_to_death_truncated)
+master_plot(cruise_ship_by_confmation, 1, 1, "topright", hospitalisation_to_death_truncated)
+
+barplot(cruise_ship_ages)
 

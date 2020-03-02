@@ -19,10 +19,42 @@ lines(xSamplesCurve, samplingFromDelayDistCurve)
 
 xSamplesDays <- seq(0,40, 1)
 xSamplesCurve <- seq(0,40, 0.1)
-samplingFromDelayDistDays <- confirmation_to_death(xSamplesDays)
-samplingFromDelayDistCurve <- confirmation_to_death(xSamplesCurve)
+samplingFromDelayDistDays <- onset_to_death_truncated(xSamplesDays)
+samplingFromDelayDistCurve <- onset_to_death_truncated(xSamplesCurve)
 plot(xSamplesDays, samplingFromDelayDistDays, 
      xlab = "Days after onset",
+     pch = 19, 
+     ylab = "P(death on a given day | death)",
+     cex.lab = 1.4,
+     cex.axis = 1.4)
+lines(xSamplesCurve, samplingFromDelayDistCurve)
+
+
+dev.off()
+
+layout(matrix(c(1, 2),
+              nrow=1, byrow=TRUE))
+
+
+xSamplesDays <- seq(0,40, 1)
+xSamplesCurve <- seq(0,40, 0.1)
+samplingFromDelayDistDays <- hospitalisation_to_death(xSamplesDays)
+samplingFromDelayDistCurve <- hospitalisation_to_death(xSamplesCurve)
+plot(xSamplesDays, samplingFromDelayDistDays, 
+     xlab = "Days after hospitalisation",
+     pch = 19, 
+     ylab = "P(death on a given day | death)",
+     cex.lab = 1.4,
+     cex.axis = 1.4)
+lines(xSamplesCurve, samplingFromDelayDistCurve)
+
+
+xSamplesDays <- seq(0,40, 1)
+xSamplesCurve <- seq(0,40, 0.1)
+samplingFromDelayDistDays <- hospitalisation_to_death_truncated(xSamplesDays)
+samplingFromDelayDistCurve <- hospitalisation_to_death_truncated(xSamplesCurve)
+plot(xSamplesDays, samplingFromDelayDistDays, 
+     xlab = "Days after hospitalisation",
      pch = 19, 
      ylab = "P(death on a given day | death)",
      cex.lab = 1.4,
