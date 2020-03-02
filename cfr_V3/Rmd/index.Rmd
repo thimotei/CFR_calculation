@@ -45,7 +45,22 @@ We also calculated CFR specific to individuals in the 80-89 age group, in which 
 | International data excluding cruise ship | 27th February | 2.27% (1.28%-3.72%) | hospitalisation-to-death non-truncated (Figure 2A) |
 |     |     | 2.89% (1.63%-4.72%) | hospitalisation-to-death truncated (Figure 2B) |
 | South Korea data | 27th Feburary | 4.11% (2.21%-6.93%) | hospitalisation-to-death (Figure 2B) |
-|    |     | 5.56% (2.99%-9.31%) | hospitalisation-to-death truncated (Figure 2B) |
+|    |     | 3.62% (2.99%-9.31%) | hospitalisation-to-death truncated (Figure 2B) |
+
+
+### Summary table of cCFR estimates in Japan, South Korea, Iran and Italy
+
+As the outbreaks in Iran and Italy are very recent, the left and right-censoring problems with their case and death incidence data are large, which is reflected heavily in their unrealistically high CFR estimates.
+
+| Dataset | cCFR | Distribution |
+| ----------- | ----------- | ----------- | ----------- |
+| Japan | 29th February | 1.26% (0.579%-2.38%) | hospitalisation-to-death non-truncated (Figure 1A) |
+|     |     | 1.53% (0.701%-0.2.88%) | hospitalisation-to-death truncated (Figure 1B) |
+| South Korea | 29th February | 2.71% (1.59%-4.31%) | hospitalisation-to-death non-truncated (Figure 2A) |
+|     |     | 3.62% (2.12%-5.73%) | hospitalisation-to-death truncated (Figure 2B) |
+| Italy | 29th Feburary | 14.8% (9.29%-21.9%) | hospitalisation-to-death (Figure 2B) |
+|    |     | 20.2% (12.8%-29.5%) | hospitalisation-to-death truncated (Figure 2B) |
+
 
 ### Wuhan Data stratified by age range
 
@@ -91,6 +106,39 @@ We plot the distribution of ages on the Diamond Princess cruise ship taken from 
 
 ```{r fig_distribution_ages, echo=FALSE, fig.align='center', fig.cap="_Figure 3: The age distribution of individuals on the Diamond Princess cruise ship._", out.width = '80%'}
 knitr::include_graphics("../plots/age_distribution.png")
+```
+
+
+## Time-series of the CFR estimates
+
+### Wuhan estimates
+
+```{r fig_wuhan_TS, echo=FALSE, fig.align='center', fig.cap="_Figure 4: A). The nCFR and cCFR estimates for Wuhan plotted against time. B). The inferred case incidence data. C). The real death incidence data._", out.width = '80%'}
+knitr::include_graphics("../plots/inferred_CFR.png")
+```
+
+### China estimates
+
+```{r fig_china_TS, echo=FALSE, fig.align='center', fig.cap="_Figure 5: A). The nCFR and cCFR estimates for China plotted against time. B). The inferred case incidence data. C). The real death incidence data._", out.width = '80%'}
+knitr::include_graphics("../plots/china_CFR.png")
+```
+
+### Japan estimates
+
+```{r fig_japan_TS, echo=FALSE, fig.align='center', fig.cap="_Figure 6: A). The nCFR and cCFR estimates for Japan plotted against time. B). The inferred case incidence data. C). The real death incidence data._", out.width = '80%'}
+knitr::include_graphics("../plots/japan_CFR.png")
+```
+
+### South Korea estimates
+
+```{r fig_korea_TS, echo=FALSE, fig.align='center', fig.cap="_Figure 7: A). The nCFR and cCFR estimates for South Korea plotted against time. B). The inferred case incidence data. C). The real death incidence data._", out.width = '80%'}
+knitr::include_graphics("../plots/korea_CFR.png")
+```
+
+### Italy estimates
+
+```{r fig_Iran_TS, echo=FALSE, fig.align='center', fig.cap="_Figure 8: A). The nCFR and cCFR estimates for Italy plotted against time. B). The inferred case incidence data. C). The real death incidence data._", out.width = '80%'}
+knitr::include_graphics("../plots/italy_CFR.png")
 ```
 
 ## Methods summary

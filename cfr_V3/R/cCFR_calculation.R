@@ -140,7 +140,6 @@ nCFR_with_CIs_main_time_series <- function(data_1, delay_dist)
   CFRVariablename1 <- as.name(paste0("cCFRRealisticTime_", deparse(substitute(data_1))))
   CFRVariablename2 <- as.name(paste0("cCFRRealisticTimeConstrained_", deparse(substitute(data_1))))
   CFRVariablename3 <- as.name(paste0("CFRCIs_", deparse(substitute(data_1))))
-  
   output_cfr_timeseries(data_1, delay_dist)  -> CFRVariablename1
   cbind(date = dateRange, CFRVariablename1) -> CFRVariablename1
   subset(CFRVariablename1, deaths > 0 & known_outcomes > 0) -> CFRVariablename2
@@ -173,25 +172,25 @@ cCFR_with_CIs_main_time_series <- function(data_1, delay_dist)
   
 }
 
-computenCFRTimeSeries <- function(data_in)
+computenCFRTimeSeries <- function(data_in, delay_dist)
 {
   
   data_in_2 <- pad(data_in)
   data_in_2 <- data_in_2   %>% mutate_if(is.integer, ~replace(., is.na(.), 0)) 
   data_in_2 <- data_in_2 %>% mutate_if(is.factor, ~replace(., is.na(.), data_in$country[1])) 
   
-  currentnCFRTimeSeries <- nCFR_with_CIs_main_time_series(data_in_2, hospitalisation_to_death_truncated)
+  currentnCFRTimeSeries <- nCFR_with_CIs_main_time_series(data_in_2, delay_dist)
   
 }
 
-computecCFRTimeSeries <- function(data_in)
+computecCFRTimeSeries <- function(data_in,  delay_dist)
 {
   
   data_in_2 <- pad(data_in)
   data_in_2 <- data_in_2   %>% mutate_if(is.integer, ~replace(., is.na(.), 0)) 
   data_in_2 <- data_in_2 %>% mutate_if(is.factor, ~replace(., is.na(.), data_in$country[1])) 
   
-  currentcCFRTimeSeries <- cCFR_with_CIs_main_time_series(data_in_2, hospitalisation_to_death_truncated)
+  currentcCFRTimeSeries <- cCFR_with_CIs_main_time_series(data_in_2, delay_dist)
 }
 
 
