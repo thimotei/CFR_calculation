@@ -78,12 +78,12 @@ master_plot(KoreaData, 1, 1, "topright", hospitalisation_to_death)
 master_plot(IranData, 1, 1, "right", hospitalisation_to_death)
 master_plot(ItalyData, 1, 1, "topright", hospitalisation_to_death)
 
-master_plot(allTogetherInferred, 1, 48, "topleft", hospitalisation_to_death_truncated)
-master_plot(JapanData, 1, 1, "top", hospitalisation_to_death_truncated)
-master_plot(KoreaData, 1, 1, "topright", hospitalisation_to_death_truncated)
-master_plot(IranData, 1, 1, "right", hospitalisation_to_death_truncated)
-master_plot(ItalyData, 1, 1, "topright", hospitalisation_to_death_truncated)
-master_plot(cruise_ship_by_confmation, 1, 1, "topright", hospitalisation_to_death_truncated)
 
-barplot(cruise_ship_ages)
+master_plot(allTogetherInferred, 1, 48, "topleft", hospitalisation_to_death_truncated)
+master_plot(ChinaData, 15, 16, "bottomright", hospitalisation_to_death_truncated)
+master_plot(JapanData, 1, 24, "top", hospitalisation_to_death_truncated)
+master_plot(KoreaData, 1, 17, "topright", hospitalisation_to_death_truncated)
+master_plot(cruise_ship_by_confmation, 1, 16, "topright", hospitalisation_to_death_truncated)
+
+plotChina
 

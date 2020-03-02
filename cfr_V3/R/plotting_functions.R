@@ -1,3 +1,12 @@
+col1 <- "#E69F00"
+col2 <- "#56B4E9"
+col3 <- "#009E73"
+col4 <- "#F0E442"
+col5 <- "#0072B2"
+col6 <- "#D55E00"
+col7 <- "#CC79A7"
+  
+
 master_plot <- function(data_in, 
                         startIntCFR,
                         startIntCD, 
@@ -19,9 +28,12 @@ master_plot <- function(data_in,
   nCFRTimeSeriesOutput <- computenCFRTimeSeries(data_in, delay_dist)
   cCFRTimeSeriesOutput <- computecCFRTimeSeries(data_in, delay_dist)
   
+  
   plotCFRTimeSeries(nCFRTimeSeriesOutput, cCFRTimeSeriesOutput, startIntCFR, legendPosition)
   plotCaseIncidence(data_in, startIntCD)
   plotDeathIncidence(data_in, startIntCD)
+  
+  
   
   outputEstimates <- cbind(tail(nCFRTimeSeriesOutput, n = 1), tail(cCFRTimeSeriesOutput, n = 1))
   return(outputEstimates)
@@ -68,7 +80,7 @@ plotCFRTimeSeries <- function(ncfr_data_in,
          cex.axis = 1.4)
   lines(x = ncfr_data_in$date[startIntCFR:endInt], 
         ncfr_data_in$ci_mid[startIntCFR:endInt],
-        col = rgb(0.8, 0.2, 0.6))
+        col = col2)
   grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
   par(xpd=TRUE)
   #text(ncfr_data_in$date[startInt] + 0.6 , 3.8, "A", cex = 1.5)
@@ -89,9 +101,9 @@ plotCFRTimeSeries <- function(ncfr_data_in,
          cex.lab = 1.4,
          cex.axis = 1.4)
   lines(x = ccfr_data_in$date[startIntCFR:endInt], 
-        ccfr_data_in$ci_mid[startIntCFR:endInt], col = rgb(0.2, 0.8, 0.6))
+        ccfr_data_in$ci_mid[startIntCFR:endInt], col = col3)
   legend(legendPosition, legend=c("naive CFR", "corrected CFR"),
-         col=c( rgb(0.8, 0.2, 0.6), rgb(0.2, 0.8, 0.6)), lty = 1:1, cex = 1.2)
+         col=c(col2, col3), lty = 1:1, cex = 1.2)
   mtext(LETTERS[1], adj = 0, line = 1) 
 }
 
@@ -106,7 +118,7 @@ plotCaseIncidence <- function(data_in_raw, startIntCD)
        ylab = "Incidence of confirmed cases",
        cex.lab = 1.4,
        cex.axis = 1.4)
-  lines(x = data_in_raw$date[startIntCD:endInt], data_in_raw$new_cases[startIntCD:endInt], col = "green")
+  lines(x = data_in_raw$date[startIntCD:endInt], data_in_raw$new_cases[startIntCD:endInt], col = col5)
   par(mar=c(3,4,1,1),mgp=c(2,0.6,0))
   #par(oma = c(4, 4, 0, 0)) # make room (i.e. the 4's) for the overall x and y axis titles
   #par(mar = c(2, 2, 1, 1)) # make the plots be closer together
@@ -127,7 +139,7 @@ plotDeathIncidence <- function(data_in_raw, startIntCD)
        ylab = "Incidence of deaths",
        cex.lab = 1.4,
        cex.axis = 1.4)
-  lines(x = data_in_raw$date[startIntCD:endInt], data_in_raw$new_deaths[startIntCD:endInt], col = "red")
+  lines(x = data_in_raw$date[startIntCD:endInt], data_in_raw$new_deaths[startIntCD:endInt], col = col6)
   par(mar=c(3,4,1,1),mgp=c(2,0.6,0))
   #par(oma = c(4, 4, 0, 0)) # make room (i.e. the 4's) for the overall x and y axis titles
   #par(mar = c(2, 2, 1, 1)) # make the plots be closer together
