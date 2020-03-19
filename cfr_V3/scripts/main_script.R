@@ -85,5 +85,3 @@ master_plot(JapanData, 1, 24, "top", hospitalisation_to_death_truncated)
 master_plot(KoreaData, 1, 17, "topright", hospitalisation_to_death_truncated)
 master_plot(cruise_ship_by_confmation, 1, 16, "topright", hospitalisation_to_death_truncated)
 
-plotChina
-

@@ -108,45 +108,42 @@ plotCFRTimeSeries <- function(ncfr_data_in,
 }
 
 
+# plotting function to plot the case epicurve
 plotCaseIncidence <- function(data_in_raw, startIntCD)
 {
-  endInt <- length(data_in_raw$date)
-  par(xpd=FALSE)
-  plot(x = data_in_raw$date[startIntCD:endInt],
-       data_in_raw$new_cases[startIntCD:endInt],
-       xlab = "",
-       ylab = "Incidence of confirmed cases",
-       cex.lab = 1.4,
-       cex.axis = 1.4)
-  lines(x = data_in_raw$date[startIntCD:endInt], data_in_raw$new_cases[startIntCD:endInt], col = col5)
-  par(mar=c(3,4,1,1),mgp=c(2,0.6,0))
-  #par(oma = c(4, 4, 0, 0)) # make room (i.e. the 4's) for the overall x and y axis titles
-  #par(mar = c(2, 2, 1, 1)) # make the plots be closer together
-  grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
-  par(xpd=TRUE)
-  mtext(LETTERS[2], adj = 0, line = 1) 
-  #text(data_in_raw$date[1] + 1 , 115, "C", cex = 1.5)
+  
+  par(mar = c(4,4,1,1))
+  barplot(data_in_raw$new_cases,
+          names.arg=data_in_raw$date,
+          col = col5, 
+          ylim = c(0,max(data_in_raw$new_cases)),
+          xlab = "Date",
+          ylab = "Daily confirmed cases",
+          cex.lab = 1.8,
+          cex.axis = 1.5,
+          las = 1)
+  mtext(LETTERS[2], adj = 0, line = 1, cex = 1.4) 
   
 }
 
+# plotting function to plot the death epicurve
 plotDeathIncidence <- function(data_in_raw, startIntCD)
 {
-  endInt <- length(data_in_raw$date)
-  par(xpd=FALSE)
-  plot(x = data_in_raw$date[startIntCD:endInt], 
-       data_in_raw$new_deaths[startIntCD:endInt],
-       xlab = "Date",
-       ylab = "Incidence of deaths",
-       cex.lab = 1.4,
-       cex.axis = 1.4)
-  lines(x = data_in_raw$date[startIntCD:endInt], data_in_raw$new_deaths[startIntCD:endInt], col = col6)
-  par(mar=c(3,4,1,1),mgp=c(2,0.6,0))
-  #par(oma = c(4, 4, 0, 0)) # make room (i.e. the 4's) for the overall x and y axis titles
-  #par(mar = c(2, 2, 1, 1)) # make the plots be closer together
-  grid(ny = NULL, nx = 0, col = rgb(0.9,0.9,0.9), lty = "solid")
-  par(xpd=TRUE)
-  mtext(LETTERS[3], adj = 0, line = 1) 
-  #text(data_in_raw$date[1] + 1 , 1.95, "D", cex = 1.5)
+  
+  par(mar = c(4,4,1,1))
+  barplot(data_in_raw$new_deaths,
+          names.arg=data_in_raw$date,
+          col = col6,
+          ylim = c(0,max(data_in_raw$new_deaths)),
+          xlab = "Date",
+          ylab = "Daily deaths",
+          yaxt = 'n',
+          cex.lab = 1.8,
+          cex.axis = 1.5)
+  at1 <- seq(0, 2, 1)
+  axis(side =2, at1, labels = T, las = 1, cex.lab = 1.8, cex.axis = 1.5)
+  mtext(LETTERS[3], adj = 0, line = 1, cex = 1.4) 
   
 }
+
 

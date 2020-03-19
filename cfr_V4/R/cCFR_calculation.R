@@ -101,7 +101,7 @@ calculate_CIs_nCFR <- function(data_1)
 }
 
 
-calculate_CIs_cCFR <- function(data_1)
+calculate_CIs_cCFR <- function(data_1, delay_dist)
 {
   
   CI_cCFR_raw_mid <- NA
