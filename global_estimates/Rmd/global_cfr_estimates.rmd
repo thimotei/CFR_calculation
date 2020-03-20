@@ -1,5 +1,5 @@
 ---
-title: "Estimating the case fatality ratio for COVID-19 globally"
+title: "Using a corrected case fatality ratio to estimate under-reporting"
 output: 
   html_document:
     theme: cosmo
@@ -22,7 +22,23 @@ To estimate the infection and case fatality ratio of COVID-19, using data online
 
 ## Current CFR results {.tabset}
 
-### naive CFR estimates
+### Under-reporting estimates
+
+```{r include=FALSE}
+underReportingEstimates <- readRDS("../data/current_underreporting_estimates.rds")
+
+```
+
+```{r include = TRUE}
+knitr::kable(underReportingEstimates,
+             col.names = c("Date",
+                           "Country",
+                           "Under-reporting estimate",
+                           "Lower CI",
+                           "Upper CI"), full_width = F, digits = 2)
+```
+
+### nCFR estimates
 
 ```{r include=FALSE}
 nCFREstimates <- readRDS("../data/current_ncfr_estimates.rds")
@@ -30,7 +46,11 @@ nCFREstimates <- readRDS("../data/current_ncfr_estimates.rds")
 ```
 
 ```{r include = TRUE}
-knitr::kable(nCFREstimates, full_width = F)
+knitr::kable(nCFREstimates, col.names = c("Date",
+                           "Country",
+                           "nCFR",
+                           "Lower CI",
+                           "Upper CI"), full_width = F, digits = 2)
 ```
 
 ### corrected CFR estimates
@@ -41,14 +61,19 @@ cCFREstimates <- readRDS("../data/current_ccfr_estimates.rds")
 ```
 
 ```{r include = TRUE}
-knitr::kable(cCFREstimates, full_width = F)
+knitr::kable(cCFREstimates, col.names = c("Date",
+                           "Country",
+                           "cCFR",
+                           "Lower CI",
+                           "Upper CI"), full_width = F, digits = 2)
 ```
 
 ## Adjusting for outcome delay in CFR estimates
 
-During an outbreak, the so-called naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [4]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [5]. 
-We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B) [6]. As a sensitivity analysis, we also consider raw “non-truncated” distributions, which do not account for censoring; the raw and truncated distributions have a mean of 8.6 days and 13 days respectively.  
-To correct the CFR, we use the case and death incidence data to estimate the number of cases with known outcomes [5]:
+During an outbreak, the so-called naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [1, 2]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [5]. 
+We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B) [3]. The distribution used is a Lognormal fit, has a mean delay of 13 days and a standard deviation of 12.7 days.
+
+To correct the CFR, we use the case and death incidence data to estimate the number of cases with known outcomes [2, 5]:
 
 $$
 u_{t} = \frac{\sum_{i = 0}^t \sum_{j = 0}^{\infty} c_{i-j} f_j}{\sum_{i = 0}^t c_i},
@@ -56,6 +81,14 @@ $$
 
 where $c_{t}$ is the daily case incidence at time, $t$, $f_t$ is the proportion of cases with delay between onset or hospitalisation and death. $u_t$ represents the underestimation of the known outcomes [5] and is used to scale the value of the cumulative number of cases in the denominator in the calculation of the cCFR.
 
+## Approximating the level of under-reporting
+
+At this stage there have been many estimates of the CFR of COVID-19 which correct for the multiple biases skewing estimates during an on-going outbreak [5, 6, 7]. These estimates range between 1% and 1.5%. We therefore assume the CFR is 1% as a crude baseline and use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation 1%/cCFR of each country to glean the an approximate level of under-reporting.
+
+## Limitations
+
+Implicit in assuming that the under-reporting is 1/cCFR of a given country is that the deviation away from the assumed 1% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1% CFR estimates, along with many other country specific factors.
+ 
 ## References
 
 1 Kucharski AJ, Edmunds WJ. Case fatality rate for ebola virus disease in west africa. The Lancet 2014;384:1260.
@@ -65,5 +98,11 @@ where $c_{t}$ is the daily case incidence at time, $t$, $f_t$ is the proportion 
 3 Linton NM, Kobayashi T, Yang Y et al. Incubation period and other epidemiological characteristics of 2019 novel coronavirus infections with right truncation: A statistical analysis of publicly available case data. Journal of Clinical Medicine 2020;9:538.
 
 4 Wu Z, McGoogan JM. Characteristics of and important lessons from the coronavirus disease 2019 (covid-19) outbreak in china: Summary of a report of 72 314 cases from the chinese center for disease control and prevention. JAMA 2020.
+
+5 Russell TW,  Hellewell J, Jarvis CI, van-Zandvoort K, Abbott S, Ratnayake R, Flasche S, Eggo RM, Kucharski AJ, CMMID nCov working group. Estimating the infection and case fatality ratio for COVID-19 using age-adjusted data from the outbreak on the Diamond Princess cruise ship. medRxiv 2020.
+
+6 Verity R, Okell LC, Dorigatti I, Winskill P, Whittaker C, Imai N, Cuomo-Dannenburg G, Thompson H, Walker P, Fu H, et al. Estimates of the severity of COVID-19 disease. medRxiv (2020)
+
+7 Guan W, Ni Z, Hu Y, Liang W, Ou C, He J, Liu L, Shan H, Lei C, Hui D SC et al. linical characteristics of coronavirus disease 2019 in China. New England Journal of Medicine (2020).
 
 

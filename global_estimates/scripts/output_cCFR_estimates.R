@@ -42,11 +42,30 @@ currentEstimatescCFR <- mutate(currentEstimatescCFR, ci_mid = ci_mid %>% signif(
   
 currentEstimatescCFR <- dplyr::rename(currentEstimatescCFR, 
                                       Date = date,
-                                      nCFR = ci_mid,
+                                      cCFR = ci_mid,
                                       Low.CI = ci_low, 
                                       High.CI = ci_high,
                                       Country = country)
 
-currentEstimatescCFR <- currentEstimatescCFR %>% select(Date, Country, nCFR, Low.CI, High.CI)
+currentEstimatescCFR <- currentEstimatescCFR %>% select(Date, Country, cCFR, Low.CI, High.CI)
 
+currentEstimatescCFR <- mutate(currentEstimatescCFR,
+                               cCFR = cCFR %>% signif(cCFR, 2),
+                               Low.CI = Low.CI %>% signif(Low.CI, 2),
+                               High.CI = High.CI %>% signif(High.CI, 2))
+
+currentEstimatescCFR <- subset(currentEstimatescCFR, Country != "Cases_on_an_international_conveyance_Japan")
+
+underreportingDF <- currentEstimatescCFR %>% mutate(Date,
+                                Country, 
+                                underreporting_estimate = signif(1/cCFR*100, 2),
+                                underreporting_estimate_low_CI = signif(1/High.CI*100, 2),
+                                underreporting_estimate_high_CI = signif(1/Low.CI*100, 2))
+
+underreportingDF$underreporting_estimate_high_CI[underreportingDF$underreporting_estimate_high_CI >= 100] <- 100
+underreportingDF <-  underreportingDF %>% select(Date, Country, underreporting_estimate, underreporting_estimate_low_CI, underreporting_estimate_high_CI)
+
+underreportingDF <- subset(underreportingDF, Country != "Cases_on_an_international_conveyance_Japan")
+
+saveRDS(underreportingDF, file = "data/current_underreporting_estimates.rds")
 saveRDS(currentEstimatescCFR, file = "data/current_ccfr_estimates.rds")

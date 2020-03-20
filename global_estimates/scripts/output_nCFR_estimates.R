@@ -38,9 +38,6 @@ for(i in 1:length(countriesCFR))
 }
 
 
-currentEstimatesnCFR <- mutate(currentEstimatesnCFR, ci_mid = ci_mid %>% signif(., 2),
-                               ci_low = ci_low %>% signif(., 2),
-                               ci_high = ci_high %>% signif(., 2))
 
 currentEstimatesnCFR <- dplyr::rename(currentEstimatesnCFR, 
                                       Date = date,
@@ -50,4 +47,12 @@ currentEstimatesnCFR <- dplyr::rename(currentEstimatesnCFR,
                                       Country = country)
 
 currentEstimatesnCFR <- currentEstimatesnCFR %>% select(Date, Country, nCFR, Low.CI, High.CI)
+
+currentEstimatesnCFR <- mutate(currentEstimatesnCFR,
+                               nCFR = nCFR %>% signif(., 2),
+                               Low.CI = Low.CI %>% signif(., 2),
+                               High.CI = High.CI %>% signif(., 2))
+
+currentEstimatesnCFR <- subset(currentEstimatesnCFR, Country != "Cases_on_an_international_conveyance_Japan")
+
 saveRDS(currentEstimatesnCFR, file = "data/current_ncfr_estimates.rds")
