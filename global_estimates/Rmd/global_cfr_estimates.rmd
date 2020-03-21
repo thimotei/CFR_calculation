@@ -48,7 +48,7 @@ allTogether <- readRDS("../data/all_results.rds")
 knitr::kable(allTogether, col.names = c("Country",
                                         "Proportion of cases reported (95% CI)",
                                         "cCFR Estimate (95% CI)",
-                                        "nCFR Estimate (95% CI)"), 
+                                        "naive CFR Estimate (95% CI)"), 
                                         full_width = F, digits = 2)
 ```
 

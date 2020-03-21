@@ -23,9 +23,9 @@ report_data <- report_data_raw %>%
   ) %>% 
   dplyr::mutate(
     confidence = dplyr::case_when(total_deaths < 10 ~ "Fewer than 10 deaths",
-                                  total_deaths < 100 ~ "Fewer than 100 deaths",
+                                  total_deaths < 100 ~ "Fewer than 100 deaths, but more than 10",
                                   total_deaths >= 100 ~ "More than (or equal to) 100 deaths") %>% 
-      factor(levels = c("More than (or equal to) 100 deaths", "Fewer than 100 deaths", "Fewer than 10 deaths"))
+      factor(levels = c("More than (or equal to) 100 deaths", "Fewer than 100 deaths, but more than 10", "Fewer than 10 deaths"))
   ) %>% 
   dplyr::mutate_if(is.numeric, ~ . / 100) %>% 
   ## Put long country names over two rows
