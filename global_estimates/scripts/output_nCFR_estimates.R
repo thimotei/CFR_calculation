@@ -1,3 +1,4 @@
+# main loop preparing data and calculating CFR
 outputnCFRTotal <- NA
 for(i in 1:length(countries))
 {
@@ -27,8 +28,9 @@ for(i in 1:length(countries))
   outputnCFRTotal <- rbind(outputnCFRTotal, outputnCFR)
 }
 
-countriesCFR <- unique(outputnCFRTotal$country)
 
+# loop building readable table of estimates
+countriesCFR <- unique(outputnCFRTotal$country)
 currentEstimatesnCFR <- NA
 for(i in 1:length(countriesCFR))
 {
@@ -38,21 +40,23 @@ for(i in 1:length(countriesCFR))
 }
 
 
-
+# cleaning data and putting into form for the large table of results
 currentEstimatesnCFR <- dplyr::rename(currentEstimatesnCFR, 
                                       Date = date,
                                       nCFR = ci_mid,
                                       Low.CI = ci_low, 
                                       High.CI = ci_high,
                                       Country = country)
-
 currentEstimatesnCFR <- currentEstimatesnCFR %>% select(Date, Country, nCFR, Low.CI, High.CI)
-
 currentEstimatesnCFR <- mutate(currentEstimatesnCFR,
                                nCFR = nCFR %>% signif(., 2),
                                Low.CI = Low.CI %>% signif(., 2),
                                High.CI = High.CI %>% signif(., 2))
-
 currentEstimatesnCFR <- subset(currentEstimatesnCFR, Country != "Cases_on_an_international_conveyance_Japan")
-
-saveRDS(currentEstimatesnCFR, file = "data/current_ncfr_estimates.rds")
+currentEstimatesnCFRNeat <- paste(currentEstimatesnCFR$nCFR,"% ("
+                                  ,currentEstimatesnCFR$Low.CI,"-"
+                                  ,currentEstimatesnCFR$High.CI,")",sep="")
+currentEstimatesnCFRNeatDF <- data.frame(Date = currentEstimatesnCFR$Date,
+                                       Country = currentEstimatesnCFR$Country,
+                                       nCFREstimates = currentEstimatesnCFRNeat)
+saveRDS(currentEstimatesnCFRNeatDF, file = "data/current_ncfr_estimates.rds")
