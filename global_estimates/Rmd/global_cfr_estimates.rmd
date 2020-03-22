@@ -46,7 +46,7 @@ To estimate the percentage of symptomatic COVID-19 cases reported in different c
 
 ## Current estimates for percentage of symptomatic cases reported and naive and delay-corrected fatality ratios {.tabset}
 
-### Plot
+### Figure
 
 ```{r include = FALSE}
 allTogetherClean <- readRDS("../data/all_together_plot_clean.rds")
@@ -74,7 +74,7 @@ allTogetherClean <- readRDS("../data/all_together_plot_clean.rds")
   ggplot2::labs(x = "Countries", y = "Percentage of cases reported") + 
   ggplot2::coord_flip()
 ```
-*Plot 1: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
+*Figure 1: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
 
 ### Table
 
@@ -95,7 +95,7 @@ knitr::kable(allTogether, col.names = c("Country",
 
 ## Adjusting for outcome delay in CFR estimates
 
-During an outbreak, the so-called naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [1, 2]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [5]. 
+During an outbreak, the naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [1, 2]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [5]. 
 We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B in [3]). The distribution used is a Lognormal fit, has a mean delay of 13 days and a standard deviation of 12.7 days [3].
 
 To correct the CFR, we use the case and death incidence data to estimate the number of cases with known outcomes [2, 5]:
