@@ -85,7 +85,7 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
   plot
 ```
 
-*Figure 1: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
+*Figure 1: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Blue shading is the 95% confidence range.*
 
 ### Table
 
@@ -119,7 +119,7 @@ At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outc
 
 ## Limitations
 
-Implicit in assuming that the under-reporting is $\frac{1.38\%}{\text{cCFR}}$ for a given country is that the deviation away from the assumed 1.38% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1.1% CFR estimates, along with many other country specific factors.
+Implicit in assuming that the under-reporting is $\frac{1.38\%}{\text{cCFR}}$ for a given country is that the deviation away from the assumed 1.38% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1.38% CFR estimates, along with many other country specific factors.
 
 The following is a list of the other prominent assumptions made in our analysis:
 

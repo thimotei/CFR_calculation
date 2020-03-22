@@ -18,14 +18,14 @@ fi
 
 # Add new report to Repo
 
-cd CFR_calculation
+cd ~/Documents/lshtm/github\ repos/CFR_calculation/
 
 Rscript -e "EpiNow::copy_report(
-               yaml = 'man/report-yaml.md',
-               report = 'Rmd/global_cfr_estimates.html',
+               yaml = '~/Documents/lshtm/github\ repos/CFR_calculation/global_estimates/man/report-yaml.md',
+               report = '~/Documents/lshtm/github\ repos/CFR_calculation/global_estimates/Rmd/global_cfr_estimates.html',
                date = Sys.Date(),
                lines_to_cut = 1:7,
-               report_target = '../cmmid.github.io/topics/covid19/severity/global_cfr_estimates.html')"
+               report_target = '../../cmmid.github.io/topics/covid19/severity/global_cfr_estimates.html')"
 
 
 # Update Repo
