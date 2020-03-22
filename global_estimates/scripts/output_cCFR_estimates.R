@@ -73,11 +73,12 @@ underreportingDF <-  underreportingDF %>% select(Date, Country, underreporting_e
 underreportingDF <- subset(underreportingDF, Country != "Cases_on_an_international_conveyance_Japan")
 
 underreportingDF$Country <- underreportingDF$Country %>% stringr::str_replace_all("_", " ") 
-underreportingDF$Country <- underreportingDF$Country %>% stringr::str_replace_all("CANADA", "Canada") 
+underreportingDF <- underreportingDF %>% filter(!stringr::str_detect(Country, "CANADA"))
+#underreportingDF$Country <- underreportingDF$Country %>% stringr::str_replace_all("CANADA", "Canada") 
 
 underReportingNeat <- paste(underreportingDF$underreporting_estimate,"% (",underreportingDF$underreporting_estimate_low_CI,"-",underreportingDF$underreporting_estimate_high_CI,")",sep="")
 underReportingNeatDF <- data.frame(Date = underreportingDF$Date,
-                                  Country = underreportingDF$Country,
+                                  country = underreportingDF$Country,
                                   UnderreportingEstimate = underReportingNeat)
 
 # exporting the various data files for the table and the plot
@@ -85,10 +86,10 @@ saveRDS(underreportingDF, file = "data/current_underreporting_estimates_broken.r
 saveRDS(underReportingNeatDF, file = "data/current_underreporting_estimates_neat.rds")
 saveRDS(currentEstimatescCFRNeatDF, file = "data/current_ccfr_estimates.rds")
 
-allResults <- data.frame(Country = underreportingDF$Country,
-                         UnderreportingEstimate = underReportingNeat,
-                         currentEstimatescCFRNeatDF$cCFREstimates,
-                         currentEstimatesnCFRNeatDF$nCFREstimates)
+allResultsCFRS <- data.frame(Country = underReportingNeatDF$country,
+                         UnderreportingEstimate = underReportingNeat)
+
+
 
 # used for the plot
-saveRDS(allResults, file = "data/all_results.rds")
+saveRDS(allResults, file = "data/all_results_CFRs.rds")

@@ -9,6 +9,7 @@ allDatDesc$date <- as.Date(allDatDesc$date)
 countries <- allDatDesc$country %>% unique
 
 # outputs total deaths for the summary plot, put together in the markdown file
+totalCasesDF <- allDatDesc %>% group_by(country) %>% summarise(total_cases = sum(new_cases))
 totalDeathsDF <- allDatDesc %>% group_by(country) %>% summarise(total_deaths = sum(new_deaths))
 totalDeathsDF$country <- totalDeathsDF$country %>% stringr::str_replace_all("_", " ")
 
@@ -17,6 +18,7 @@ saveRDS(totalDeathsDF, file = "data/total_deaths.rds")
 
 
 # calculating quantiles for the summary plot 
+quantilesRes <- c()
 for(i in 1:length(underreportingDF$underreporting_estimate_low_CI))
 {
   tmp <- c(underreportingDF$underreporting_estimate_low_CI[i],underreportingDF$underreporting_estimate_high_CI[i])
@@ -36,3 +38,9 @@ allTogetherPlotDF <- data.frame(country = underreportingDF$Country,
                                 quantile95.5 = quantilesRes[,5])
 
 saveRDS(allTogetherPlotDF, file = "data/all_together_plot.rds")
+
+casesDeathsDF <- dplyr::left_join(totalCasesDF, totalDeathsDF)
+casesDeathsDF$country <- casesDeathsDF$country %>% stringr::str_replace_all("_", " ") 
+all_results <- dplyr::left_join(underReportingNeatDF, casesDeathsDF) %>% select(-Date)
+
+saveRDS(all_results, "data/all_results_reporting_cases_deaths")
