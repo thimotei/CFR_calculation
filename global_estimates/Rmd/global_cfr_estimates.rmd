@@ -12,6 +12,7 @@ library(dplyr)
 library(ggplot2)
 library(scales)
 library(cowplot)
+library(patchwork)
 
 ```
 
@@ -24,7 +25,7 @@ knitr::opts_chunk$set(echo = FALSE)
 target_date <- Sys.Date()
 ```
 
-*Timothy W Russell<sup> &ast; </sup>, Joel Hellewell<sup>†</sup>, Christopher I Jarvis<sup>†</sup>, Kevin Van Zandvoort<sup>†</sup>, Sam Abbott<sup>†</sup>, Ruwan Ratnayake<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
+*Timothy W Russell<sup> &ast; </sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
 
 <sup> † </sup> authors contributed equally
 
@@ -40,50 +41,60 @@ To estimate the percentage of symptomatic COVID-19 cases reported in different c
 
 * In real-time, dividing deaths-to-date by cases-to-date leads to a biased estimate of the case fatality ratio (CFR), because this calculation does not account for delays from confirmation of a case to death, and under-reporting of cases.
 
-* Using the distribution of the delay from hospitalisation to death for cases that are fatal, we can estimate how many cases so far are expected to have known outcomes (i.e. death or recovery), and hence adjust the naive estimates of CFR to account for these delays
+* Using the distribution of the delay from hospitalisation-to-death for cases that are fatal, we can estimate how many cases so far are expected to have known outcomes (i.e. death or recovery), and hence adjust the naive estimates of CFR to account for these delays
 
-* The adjusted CFR does not account for under-reporting. However, given that the best available estimates of CFR are in the 1-1.5% range, we therefore assume that the baseline CFR is 1%, and if a country has an adjusted CFR that is higher (e.g. 20%), it suggests that only a fraction of cases have been reported (in this case, 1/20).
+* The adjusted CFR does not account for under-reporting. However, given that the best available estimates of CFR (adjusting or controlling for under-reporting) are in the 1%-1.5% range, we therefore assume that the baseline CFR is 1.1% (95% CI: 0.3–2.4%)[5], and if a country has an adjusted CFR that is higher (e.g. 20%), it suggests that only a fraction of cases have been reported (in this case, $\frac{1.1}{20} = 5.5%$ cases reported approximately).
 
-## Current estimates for percentage of symptomatic cases reported and naive and delay-corrected fatality ratios {.tabset}
+## Current estimates for percentage of symptomatic cases reported for countries with greater than five deaths {.tabset}
 
-### Plot
+### Figure
 
 ```{r include = FALSE}
-allTogetherClean <- readRDS("../data/all_together_plot_clean.rds")
- allTogetherOrdered <- allTogetherClean %>% 
+allTogetherClean <- readRDS("../data/all_together_clean.rds")
+
+dataTable <- allTogetherClean %>% dplyr::select(country, under-reporting_estimate, total_cases, total_deaths)
+
+ dataPlot <- allTogetherClean %>% 
     dplyr::mutate(
       country = country  %>% 
         factor(levels = allTogetherClean %>% 
                  dplyr::arrange(desc(upper)) %>% 
                  dplyr::pull(country) %>% 
                  unique()))
+ 
+ #subPlotData1 <- dataPlot %>% filter(confidence == "Countries which have reported 100 or more deaths")
+ #subPlotData2 <- dataPlot %>% filter(confidence == "Countries that have reported fewer than 100 deaths, but more than 10")
+ #subPlotData3 <- dataPlot %>% filter(confidence == "Countries that have reported fewer than or equal to 10 deaths")
 ```
 
-```{r include = TRUE, fig.width = 13, fig.height = 20}
-  allTogetherOrdered %>% 
+```{r include = TRUE, fig.width = 13, fig.height = 12}
+  plot <- dataPlot %>% 
   ggplot2::ggplot(ggplot2::aes(x = country)) +
-  ggplot2::geom_linerange(ggplot2::aes(ymin = bottom, ymax = top), col = "#344b85", size = 4,  alpha = 0.4) +
+  ggplot2::geom_linerange(ggplot2::aes(ymin = bottom, ymax = top), col = "#344b85", size = 4,  alpha = 0.3) +
   ggplot2::geom_linerange(ggplot2::aes(ymin = lower, ymax = upper), col = "#344b85",  size = 4,  alpha = 0.5) +
-  ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1L)) +
-  ggplot2::facet_wrap(~ confidence, ncol = 1, scales = "free", shrink = TRUE) +
+  ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1L), limits=c(0,1)) +
+  ggplot2::geom_hline(yintercept = 0, linetype = 2) +
   cowplot::theme_cowplot() +
   cowplot::panel_border() +
-  ggplot2::theme(axis.text.x = element_text(angle = 0, size = 10), axis.text.y = element_text(size = 10)) +
+  ggplot2::theme(axis.text.x = element_text(angle = 0, size = 15), axis.text.y = element_text(size = 15)) +
   ggplot2::theme(legend.position = "none") +
   ggplot2::guides(col = ggplot2::guide_legend(nrow = 2)) +
   ggplot2::labs(x = "Countries", y = "Percentage of cases reported") + 
   ggplot2::coord_flip()
+  plot
 ```
+<<<<<<< HEAD
+
+
 *Plot 1: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
+=======
+*Figure 1: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
+>>>>>>> 8292c5a4d75761ae770bc35ab0a6e98011c5c2c4
 
 ### Table
 
-```{r include = FALSE}
-allTogether <- readRDS("../data/all_results_reporting_cases_deaths")
-```
-
-```{r include = TRUE}
-knitr::kable(allTogether, col.names = c("Country",
+```{r include=TRUE}
+knitr::kable(dataTable, col.names = c("Country",
                                         "Percentage of cases reported (95% CI)",
                                         "Total cases",
                                         "Total deaths"), 
@@ -95,7 +106,7 @@ knitr::kable(allTogether, col.names = c("Country",
 
 ## Adjusting for outcome delay in CFR estimates
 
-During an outbreak, the so-called naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [1, 2]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [5]. 
+During an outbreak, the naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [1, 2]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [5]. 
 We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B in [3]). The distribution used is a Lognormal fit, has a mean delay of 13 days and a standard deviation of 12.7 days [3].
 
 To correct the CFR, we use the case and death incidence data to estimate the number of cases with known outcomes [2, 5]:
@@ -108,17 +119,19 @@ where $u_t$ represents the underestimation of the known outcomes [5] and is used
 
 ## Approximating the proportion of symptomatic cases reported
 
-At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outcome, but not under-reporting, have been calculated. These estimates range between 1% and 1.5% [5, 6, 7]. We assume a CFR of 1% as a crude baseline and use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation 1%/cCFR of each country to estimate an approximate fraction of cases reported.
+At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outcome, but not under-reporting, have been calculated. These estimates range between 1% and 1.5% [5, 6, 7]. We assume a CFR of 1.1% [5] - calculated in a population where very little under-reporting was possible as every individual was tested - as a baseline CFR. We use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation $\frac{1.1}{\text{cCFR}}$ of each country to estimate an approximate fraction of cases reported.
 
 ## Limitations
 
-Implicit in assuming that the under-reporting is 1/cCFR for a given country is that the deviation away from the assumed 1% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1% CFR estimates, along with many other country specific factors.
+Implicit in assuming that the under-reporting is 1.1/cCFR for a given country is that the deviation away from the assumed 1.1% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1.1% CFR estimates, along with many other country specific factors.
 
 The following is a list of the other prominent assumptions made in our analysis:
 
-* We assume that people get tested upon hospitalisation. A few examples where this is not the case are Germany and South Korea, where people can get tested earlier [REF];
+* We assume that people get tested upon hospitalisation. A few examples where this is not the case are Germany and South Korea, where people can get tested earlier.
 
-* We assume that hospitalisation to death from early Wuhan is representative of the all the other countries (by using the distribution parameterised using early Wuhan data) and that all countries have the same risk and age profile as Wuhan;
+* We assume that hospitalisation to death from early Wuhan is representative of the all the other countries (by using the distribution parameterised using early Wuhan data) and that all countries have the same risk and age profile as Wuhan.
+
+* Severity of COVID-19 is known to increase with age. Therefore, countries with older populations will naturally see higher death rates. We are extending this analysis to adjust for the age distribution for countries with more than five reported deaths and where age distribution data is available.
 
 ## Code and data availability
 
