@@ -4,7 +4,7 @@
 # Get or update CMMID
 cd ..
 base_url="https://github.com/cmmid/"
-project="~/Documents/lshtm/github repos/cmmid.github.io"
+project="~/Documents/lshtm/github\ repos/cmmid.github.io"
 
 # Update git or clone if not present
 if ([ -e $project ]); then
