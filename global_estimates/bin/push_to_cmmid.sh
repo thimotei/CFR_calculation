@@ -1,9 +1,10 @@
 #!/bin/bash
 
+
 # Get or update CMMID
 cd ..
 base_url="https://github.com/cmmid/"
-project="cmmid.github.io"
+project="~/Documents/lshtm/github repos/cmmid.github.io"
 
 # Update git or clone if not present
 if ([ -e $project ]); then
@@ -20,12 +21,16 @@ fi
 
 cd ~/Documents/lshtm/github\ repos/CFR_calculation/
 
+Rscript global_estimates/scripts/main_script_clean.R
+
+R -e "rmarkdown::render('global_estimates/Rmd/global_cfr_estimates_public.rmd', run_pandoc = FALSE)"
+
 Rscript -e "EpiNow::copy_report(
-               yaml = '~/Documents/lshtm/github\ repos/CFR_calculation/global_estimates/man/report-yaml.md',
-               report = '~/Documents/lshtm/github\ repos/CFR_calculation/global_estimates/Rmd/global_cfr_estimates.html',
+               yaml = 'global_estimates/man/report-yaml.md',
+               report = 'global_estimates/Rmd/global_cfr_estimates_public.html',
                date = Sys.Date(),
                lines_to_cut = 1:7,
-               report_target = '../../cmmid.github.io/topics/covid19/severity/global_cfr_estimates.html')"
+               report_target = '../cmmid.github.io/topics/covid19/severity/_posts/2020-03-22-global_cfr_estimates.html')"
 
 
 # Update Repo

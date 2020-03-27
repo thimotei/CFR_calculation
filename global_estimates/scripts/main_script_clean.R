@@ -1,3 +1,5 @@
+setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
+
 zmeanHDT <- 13
 zsdHDT <- 12.7
 zmedianHDT <- 9.1
@@ -55,7 +57,7 @@ allTogetherClean2 <- allDatDesc %>%
   dplyr::filter(cum_deaths > 0) %>%
   dplyr::select(-cum_deaths) %>%
   dplyr::do(scale_cfr(., delay_fun = hospitalisation_to_death_truncated)) %>%
-  dplyr::filter(cum_known_t > 0) %>%
+  dplyr::filter(cum_known_t > 0 & cum_known_t >= total_deaths)  %>%
   dplyr::mutate(nCFR_UQ = binom.test(total_deaths, total_cases)$conf.int[2],
                 nCFR_LQ = binom.test(total_deaths, total_cases)$conf.int[1],
                 cCFR_UQ = binom.test(total_deaths, cum_known_t)$conf.int[2],
@@ -65,8 +67,9 @@ allTogetherClean2 <- allDatDesc %>%
                 upper = cCFREstimateRange[2] / (100 * cCFR_LQ),
                 quantile25 = binom.test(total_deaths, cum_known_t, conf.level = 0.5)$conf.int[1],
                 quantile75 = binom.test(total_deaths, cum_known_t, conf.level = 0.5)$conf.int[2],
-                bottom = cCFRIQRRange[1] / (100 * quantile75),
-                top = cCFRIQRRange[2] / (100 * quantile25)) %>%
+                #bottom = cCFRIQRRange[1] / (100 * quantile75),
+                #top = cCFRIQRRange[2] / (100 * quantile25)
+                ) %>% 
   dplyr::filter(total_deaths > 10)
                 #confidence = dplyr::case_when(total_deaths >= 100 ~ "Countries which have reported 100 or more deaths",
                 #                              total_deaths < 100 && total_deaths > 10  ~ "Countries that have reported fewer than 100 deaths, but more than 10",
@@ -78,19 +81,19 @@ allTogetherClean2 <- allDatDesc %>%
 
 reportDataFinal <- allTogetherClean2 %>%
   dplyr::select(country, total_cases, total_deaths, underreporting_estimate, lower,
-                upper, bottom, top) %>%
+                upper) %>%
   #dplyr::mutate(is.numeric, signif, digits=2)  %>%
   dplyr::mutate(underreporting_estimate = ifelse(underreporting_estimate <= 1, underreporting_estimate, 1)) %>%
   dplyr::mutate(upper = ifelse(upper <= 1, upper, 1)) %>%
-  dplyr::mutate(top = ifelse(top <= 1, top, 1)) %>%
+  #dplyr::mutate(top = ifelse(top <= 1, top, 1)) %>%
   dplyr::mutate(underreporting_estimate = signif(underreporting_estimate, 2)) %>%
   dplyr::mutate(lower = signif(lower, 2)) %>%
   dplyr::mutate(upper = signif(upper, 2)) %>%
-  dplyr::mutate(bottom = signif(bottom, 2)) %>%
-  dplyr::mutate(top = signif(top, 2)) %>%
+  #dplyr::mutate(bottom = signif(bottom, 2)) %>%
+  #dplyr::mutate(top = signif(top, 2)) %>%
   dplyr::ungroup(country) %>%
   dplyr::mutate(country = country %>% stringr::str_replace_all("_", " ")) %>% 
   dplyr::mutate(underreporting_estimate_clean = paste0(underreporting_estimate*100,
                                                 "% (",lower*100,"% - ",upper*100,"%)"))
 
-saveRDS(reportDataFinal, "data/all_together_clean.rds")
+saveRDS(reportDataFinal, "data/reportDataFinal.rds")

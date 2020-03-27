@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = FALSE)
 target_date <- Sys.Date()
 ```
 
-*Timothy W Russell<sup> &ast; </sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
+*Timothy W Russell<sup>&ast;</sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
 
 <sup> † </sup> authors contributed equally
 
@@ -43,14 +43,14 @@ To estimate the percentage of symptomatic COVID-19 cases reported in different c
 
 * Using the distribution of the delay from hospitalisation-to-death for cases that are fatal, we can estimate how many cases so far are expected to have known outcomes (i.e. death or recovery), and hence adjust the naive estimates of CFR to account for these delays.
 
-* The adjusted CFR does not account for under-reporting. However, the best available estimates of CFR (adjusting or controlling for under-reporting) are in the 1% - 1.5% range. We assume a baseline CFR, taken from a large study in China, of 1.38% (95% crI: 1.23–1.53%)[6]. If a country has an adjusted CFR that is higher (e.g. 20%), it suggests that only a fraction of cases have been reported (in this case, $\frac{1.38}{20} = 6.9\%$ cases reported approximately).
+* The adjusted CFR does not account for under-reporting. However, the best available estimates of CFR (adjusting or controlling for under-reporting) are in the 1% - 1.5% range. We assume a baseline CFR, taken from a large study in China, of 1.38% (95% crI: 1.23–1.53%)[@verity2020estimates]. If a country has an adjusted CFR that is higher (e.g. 20%), it suggests that only a fraction of cases have been reported (in this case, $\frac{1.38}{20} = 6.9\%$ cases reported approximately).
 
 ## Current estimates for percentage of symptomatic cases reported for countries with greater than ten deaths {.tabset}
 
 ### Figure
 
 ```{r include = FALSE}
-allTogetherClean <- readRDS("../data/all_together_clean.rds")
+allTogetherClean <- readRDS("../data/reportDataFinal.rds")
 
 dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate_clean, total_cases, total_deaths)
 
@@ -67,15 +67,15 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
  #subPlotData3 <- dataPlot %>% filter(confidence == "Countries that have reported fewer than or equal to 10 deaths")
 ```
 
-```{r include = TRUE, fig.width = 13, fig.height = 12}
+```{r include = TRUE, fig.width = 13, fig.height = 10}
   plot <- dataPlot %>% 
   ggplot2::ggplot(ggplot2::aes(x = country)) +
   #ggplot2::geom_linerange(ggplot2::aes(ymin = bottom, ymax = top), col = "#344b85", size = 4,  alpha = 0.7) +
-  ggplot2::geom_linerange(ggplot2::aes(ymin = lower, ymax = upper), col = "#344b85",  size = 4,  alpha = 0.7) +
+  ggplot2::geom_linerange(ggplot2::aes(ymin = lower, ymax = upper), col = "#344b85",  size = 5,  alpha = 0.7) +
   ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1L), limits=c(0,1),  breaks = seq(0, 1, 0.1)) +
   ggplot2::geom_hline(yintercept = 0, linetype = 2) +
   ggplot2::geom_hline(yintercept = 1, linetype = 2) +
-  cowplot::theme_cowplot() +
+  #cowplot::theme_cowplot() +
   cowplot::panel_border() +
   ggplot2::theme(axis.text.x = element_text(angle = 0, size = 15), axis.text.y = element_text(size = 15)) +
   ggplot2::theme(legend.position = "none") +
@@ -102,20 +102,21 @@ knitr::kable(dataTable, col.names = c("Country",
 
 ## Adjusting for outcome delay in CFR estimates
 
-During an outbreak, the naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [1, 2]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [5]. 
-We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B in [3]). The distribution used is a Lognormal fit, has a mean delay of 13 days and a standard deviation of 12.7 days [3].
+During an outbreak, the naive CFR (nCFR), i.e. the ratio of reported deaths date to reported cases to date, will underestimate the true CFR because the outcome (recovery or death) is not known for all cases [@kucharski2014case, @nishiura2009early]. We can therefore estimate the true denominator for the CFR (i.e. the number of cases with known outcomes) by accounting for the delay from confirmation-to-death [@russell2020estimating].
 
-To correct the CFR, we use the case and death incidence data to estimate the number of cases with known outcomes [2, 5]:
+We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B in [@@linton2020incubation]). The distribution used is a Lognormal fit, has a mean delay of 13 days and a standard deviation of 12.7 days [@linton2020incubation].
+
+To correct the CFR, we use the case and death incidence data to estimate the number of cases with known outcomes [@nishiura2009early; @russell2020estimating]:
 
 $$
 u_{t} = \frac{\sum_{i = 0}^t \sum_{j = 0}^{\infty} c_{i-j} f_j}{\sum_{i = 0}^t c_i},
 $$ 
 
-where $u_t$ represents the underestimation of the known outcomes [5] and is used to scale the value of the cumulative number of cases in the denominator in the calculation of the cCFR, $c_{t}$ is the daily case incidence at time, $t$ and $f_t$ is the proportion of cases with delay of $t$ between confirmation and death.
+where $u_t$ represents the underestimation of the known outcomes [@kucharski2014case; @nishiura2009early; @russell2020estimating] and is used to scale the value of the cumulative number of cases in the denominator in the calculation of the cCFR, $c_{t}$ is the daily case incidence at time, $t$ and $f_t$ is the proportion of cases with delay of $t$ between confirmation and death.
 
 ## Approximating the proportion of symptomatic cases reported
 
-At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outcome, but not under-reporting, have been calculated. These estimates range between 1% and 1.5% [5, 6, 7]. We assume a CFR of 1.38% (95% crI 1.23% - 1.53%), taken from a recent large study [6], as a baseline CFR. We use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation $\frac{1.38\%}{\text{cCFR}}$ of each country to estimate an approximate fraction of cases reported.
+At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outcome, but not under-reporting, have been calculated. These estimates range between 1% and 1.5% [@russell2020estimating; @verity2020estimates; @guan2020clinical]. We assume a CFR of 1.38% (95% crI 1.23% - 1.53%), taken from a recent large study [@verity2020estimates], as a baseline CFR. We use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation $\frac{1.38\%}{\text{cCFR}}$ of each country to estimate an approximate fraction of cases reported.
 
 ## Limitations
 
@@ -129,16 +130,19 @@ The following is a list of the other prominent assumptions made in our analysis:
 
 * Severity of COVID-19 is known to increase with age. Therefore, countries with older populations will naturally see higher death rates. We are extending this analysis to adjust for the age distribution for countries with more than five reported deaths and where age distribution data is available.
 
-* All results are linked and biased by the baseline CFR, assumed at 1.38% [6].
+* All results are linked and biased by the baseline CFR, assumed at 1.38% [@verity2020estimates].
 
 * The under-reporting estimate is very sensitive to the baseline CFR, meaning that small errors in it lead to large errors in the estimate for under-reporting.
 
 ## Code and data availability
 
-The code is publically available at https://github.com/thimotei/CFR_calculation. The data required for this analysis is a time-series for both cases and deaths, along with the corresponding delay distribution. We scrape this data from [ECDC](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide), using the NCoVUtils package [8]. 
+The code is publically available at https://github.com/thimotei/CFR_calculation. The data required for this analysis is a time-series for both cases and deaths, along with the corresponding delay distribution. We scrape this data from [ECDC](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide), using the NCoVUtils package [@nCovUtils2019]. 
  
 ## References
 
+<div id = 'refs'></div>
+
+<!---
 1 Kucharski AJ, Edmunds WJ. Case fatality rate for ebola virus disease in west africa. The Lancet 2014;384:1260.
 
 2 Nishiura H, Klinkenberg D, Roberts M et al. Early epidemiological assessment of the virulence of emerging infectious diseases: A case study of an influenza pandemic. PLoS One 2009;4.
@@ -154,3 +158,4 @@ The code is publically available at https://github.com/thimotei/CFR_calculation.
 7 Guan W, Ni Z, Hu Y, Liang W, Ou C, He J, Liu L, Shan H, Lei C, Hui D SC et al. linical characteristics of coronavirus disease 2019 in China. New England Journal of Medicine (2020).
 
 8 Abbott S, Hellewell J, Munday JD et al. NCoVUtils: Utility functions for the 2019-ncov outbreak. - 2020;-:–. doi:10.5281/zenodo.3635417
+--->
