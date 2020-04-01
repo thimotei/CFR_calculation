@@ -37,12 +37,19 @@ scale_cfr <- function(data_1_in, delay_fun){
   data.frame(nCFR = b_tt, cCFR = p_tt, total_deaths = sum(death_incidence), 
              cum_known_t = round(cumulative_known_t), total_cases = sum(case_incidence))
 }
+
+
+
+
+
+
 # Get data
-allDat <- NCoVUtils::get_ecdc_cases()
+httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
+allDat <- read.csv(tf)
 allDatDesc <- allDat %>% 
-  dplyr::arrange(country, date) %>% 
-  dplyr::mutate(date = lubridate::ymd(date)) %>% 
-  dplyr::rename(new_cases = cases, new_deaths = deaths) %>%
+  dplyr::arrange(countriesAndTerritories, dateRep) %>% 
+  dplyr::mutate(dateRep = lubridate::dmy(dateRep))%>% 
+  dplyr::rename(date = dateRep, new_cases = cases, new_deaths = deaths, country = countriesAndTerritories) %>%
   dplyr::select(date, country, new_cases, new_deaths) %>%
   dplyr::filter(country != "CANADA", 
                 country != "Cases_on_an_international_conveyance_Japan")

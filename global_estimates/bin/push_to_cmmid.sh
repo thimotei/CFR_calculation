@@ -2,20 +2,30 @@
 
 
 # Get or update CMMID
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+echo "$DIR"
+
 cd ..
+
 base_url="https://github.com/cmmid/"
-project="~/Documents/lshtm/github\ repos/cmmid.github.io"
+project="cmmid.github.io"
+
+cd $project
+
+git pull
 
 # Update git or clone if not present
-if ([ -e $project ]); then
-printf "\tUpdating project: %s \n" $project
-cd $project
-git pull
-cd ..
-else
-  printf "\tCloning project: %s into projects: %s\n" $project $1
-git clone "$base_url$project.git"
-fi
+#if ([ -e $project ]); then
+#printf "\tUpdating project: %s \n" $project
+#cd $project
+#git pull
+#cd ..
+#else
+  #printf "\tCloning project: %s into projects: %s\n" $project $1
+#git clone "$base_url$project.git"
+#fi
 
 # Add new report to Repo
 

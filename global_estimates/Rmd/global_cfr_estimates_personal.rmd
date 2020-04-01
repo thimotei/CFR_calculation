@@ -67,7 +67,7 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
  #subPlotData3 <- dataPlot %>% filter(confidence == "Countries that have reported fewer than or equal to 10 deaths")
 ```
 
-```{r include = TRUE, fig.width = 13, fig.height = 10}
+```{r include = TRUE, fig.width = 13, fig.height = 13}
   plot <- dataPlot %>% 
   ggplot2::ggplot(ggplot2::aes(x = country)) +
   #ggplot2::geom_linerange(ggplot2::aes(ymin = bottom, ymax = top), col = "#344b85", size = 4,  alpha = 0.7) +
