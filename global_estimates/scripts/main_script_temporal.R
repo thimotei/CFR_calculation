@@ -100,14 +100,15 @@ for(ii in 1:length(countrypickList)){
   data_1_in_Pick <- allTogetherCleanA %>% filter(country==countrypick)
   true_cfr <- 1.4/100
   cum_sum_d <- cumsum(data_1_in_Pick$new_deaths)
+  pick_period <- (cum_sum_d>=15)
   
   out_cfr <- scale_cfr_temporal(data_1_in_Pick)
   reporting_estimate <- (true_cfr/out_cfr$cCFR) %>% pmin(.,1)
-  reporting_estimate[cum_sum_d<15] <- NA # remove before deaths
+  reporting_estimate[!pick_period] <- NA # remove before deaths
   xx_date <- data_1_in_Pick$date-zmeanHDT
   
   # Rough plot & set colours
-  plot(xx_date,reporting_estimate,ylim=c(0,1),ylab="reported",xlab="",main=countrypick)
+  plot(xx_date[pick_period],reporting_estimate[pick_period],ylim=c(0,1),ylab="proportion of cases reported",xlab="",main=countrypick)
   
   col_def <-   list(col1=rgb(1,0,0),col2=rgb(0.8,0.6,0),col3=rgb(0,0.8,0.8),col4=rgb(0.1,0.4,0.1),col5=rgb(1,0.4,1),col6=rgb(0.2,0,0.8),"dark grey")
   col_def_F <- list(col1=rgb(1,0,0,0.2),col2=rgb(0.8,0.6,0,0.5),col3=rgb(0,0.8,0.8,0.5),col5=rgb(0.1,0.4,0.1,0.5),col6=rgb(1,0.4,1,0.5),col7=rgb(0.2,0,0.8,0.5),"grey")
@@ -119,7 +120,7 @@ for(ii in 1:length(countrypickList)){
   modelB.P <- gam(report ~ s(date) , data = data_fit,family = "gaussian")
   
   # Predict data
-  xx_pred <- xx_date[cum_sum_d>=15]
+  xx_pred <- xx_date[pick_period]
   preds <- predict(modelB.P, newdata = list(date=as.numeric(xx_pred)), type = "link", se.fit = TRUE)
   critval <- 1.96; upperCI <- preds$fit + (critval * preds$se.fit); lowerCI <- preds$fit - (critval * preds$se.fit)
   fit <- preds$fit
