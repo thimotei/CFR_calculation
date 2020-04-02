@@ -86,17 +86,35 @@ allTogetherCleanA <- allDatDesc %>%
 
 # Plot rough reporting over time -----------------------------------------
 
-countrypick <- "Denmark"
-#countrypick <- "United_Kingdom"
-#countrypick <- "Germany"
+#countrypick <- "Denmark"
+countrypickList <- c("Denmark","United_Kingdom","Germany","China","South_Korea","United_States_of_America")
 
-data_1_in_Pick <- allTogetherCleanA %>% filter(country==countrypick)
-true_cfr <- 1.4/100
+par(mfcol=c(2,6),mar=c(3,3,1,1),mgp=c(2,0.6,0))
 
-out_cfr <- scale_cfr_temporal(data_1_in_Pick)
-
-# Rough plot
-par(mar=c(3,3,1,1),mgp=c(2,0.6,0))
-
-plot(data_1_in_Pick$date-zmeanHDT,true_cfr/out_cfr$cCFR,ylim=c(0,1),ylab="reported",xlab="",main=countrypick)
-
+for(ii in 1:6){
+  
+  countrypick <- countrypickList[ii]
+  
+  data_1_in_Pick <- allTogetherCleanA %>% filter(country==countrypick)
+  true_cfr <- 1.4/100
+  
+  out_cfr <- scale_cfr_temporal(data_1_in_Pick)
+  reporting_estimate <- (true_cfr/out_cfr$cCFR) %>% pmin(.,1)
+  
+  # Rough plot
+  plot(data_1_in_Pick$date-zmeanHDT,reporting_estimate,ylim=c(0,1),ylab="reported",xlab="",main=countrypick)
+  
+  # Estimate true symptomatic cases
+  
+  # Align case data with reporting
+  estimate_cases <- head(data_1_in_Pick$new_cases,-zmeanHDT)/tail(reporting_estimate,-zmeanHDT) 
+  date_match <- head(data_1_in_Pick$date,-zmeanHDT)
+  
+  plot(date_match,estimate_cases,ylab="cases",xlab="",log="y",main=countrypick)
+  lines(data_1_in_Pick$date,data_1_in_Pick$new_cases,col="blue")
+}
+  
+dev.copy(png,paste("outputs/calc_1.png",sep=""),units="cm",width=25,height=10,res=150)
+dev.off()
+  
+  
