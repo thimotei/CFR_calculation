@@ -42,10 +42,12 @@ scale_cfr <- function(data_1_in, delay_fun){
 
 
 
-
 # Get data
-httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
+httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
 allDat <- read.csv(tf)
+
+library(dplyr)
+
 allDatDesc <- allDat %>% 
   dplyr::arrange(countriesAndTerritories, dateRep) %>% 
   dplyr::mutate(dateRep = lubridate::dmy(dateRep))%>% 
