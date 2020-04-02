@@ -12,10 +12,10 @@ cCFREstimateRange <- c(1.23, 1.53)
 
 
 # Hospitalisation to death distribution
-hospitalisation_to_death_truncated <- function(x)
-{
-  dlnorm(x, muHDT, sigmaHDT)
+hospitalisation_to_death_truncated <- function(x) {
+  plnorm(x + 1, muHDT, sigmaHDT) - plnorm(x, muHDT, sigmaHDT)
 }
+
 # Function to work out correction CFR
 scale_cfr <- function(data_1_in, delay_fun){
   case_incidence <- data_1_in$new_cases
