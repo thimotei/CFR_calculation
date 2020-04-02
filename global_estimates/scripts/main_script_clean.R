@@ -12,10 +12,10 @@ cCFREstimateRange <- c(1.23, 1.53)
 
 
 # Hospitalisation to death distribution
-hospitalisation_to_death_truncated <- function(x)
-{
-  dlnorm(x, muHDT, sigmaHDT)
+hospitalisation_to_death_truncated <- function(x) {
+  plnorm(x + 1, muHDT, sigmaHDT) - plnorm(x, muHDT, sigmaHDT)
 }
+
 # Function to work out correction CFR
 scale_cfr <- function(data_1_in, delay_fun){
   case_incidence <- data_1_in$new_cases
@@ -42,10 +42,12 @@ scale_cfr <- function(data_1_in, delay_fun){
 
 
 
-
 # Get data
-httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
+httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
 allDat <- read.csv(tf)
+
+library(dplyr)
+
 allDatDesc <- allDat %>% 
   dplyr::arrange(countriesAndTerritories, dateRep) %>% 
   dplyr::mutate(dateRep = lubridate::dmy(dateRep))%>% 
