@@ -1,5 +1,17 @@
-setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
+# Code to estimate reporting
 
+
+# Set up paths and parameters ---------------------------------------------
+
+# Load libraries
+library(tidyverse)
+library(padr)
+
+# Set paths
+setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
+if(grepl(Sys.info()["user"], pattern = "^adamkuchars(ki)?$")){setwd("~/Documents/GitHub/CFR_calculation/global_estimates/")}
+
+# Set parameters
 zmeanHDT <- 13
 zsdHDT <- 12.7
 zmedianHDT <- 9.1
@@ -10,11 +22,13 @@ cCFREstimateRange <- c(1.23, 1.53)
 #cCFRIQRRange <- c(1.3, 1.4)
 
 
-
 # Hospitalisation to death distribution
 hospitalisation_to_death_truncated <- function(x) {
   plnorm(x + 1, muHDT, sigmaHDT) - plnorm(x, muHDT, sigmaHDT)
 }
+
+
+# Define CFR function -----------------------------------------------------
 
 # Function to work out correction CFR
 scale_cfr <- function(data_1_in, delay_fun){
@@ -41,12 +55,11 @@ scale_cfr <- function(data_1_in, delay_fun){
 
 
 
+# Load data -----------------------------------------------------
 
-# Get data
 httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
 allDat <- read.csv(tf)
 
-library(dplyr)
 
 allDatDesc <- allDat %>% 
   dplyr::arrange(countriesAndTerritories, dateRep) %>% 
@@ -75,7 +88,7 @@ allTogetherClean2 <- allDatDesc %>%
                 lower = cCFREstimateRange[1] / (100 * cCFR_UQ),
                 upper = cCFREstimateRange[2] / (100 * cCFR_LQ),
                 quantile25 = binom.test(total_deaths, cum_known_t, conf.level = 0.5)$conf.int[1],
-                quantile75 = binom.test(total_deaths, cum_known_t, conf.level = 0.5)$conf.int[2],
+                quantile75 = binom.test(total_deaths, cum_known_t, conf.level = 0.5)$conf.int[2]
                 #bottom = cCFRIQRRange[1] / (100 * quantile75),
                 #top = cCFRIQRRange[2] / (100 * quantile25)
                 ) %>% 
