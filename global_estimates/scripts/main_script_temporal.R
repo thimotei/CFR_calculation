@@ -13,6 +13,7 @@ library(mgcv)
 # Set paths
 setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
 if(grepl(Sys.info()["user"], pattern = "^adamkuchars(ki)?$")){setwd("~/Documents/GitHub/CFR_calculation/global_estimates/")}
+if(Sys.info()["user"] == 'hamishgibbs'){setwd("~/Documents/Covid-19/CFR_calculation/global_estimates")}
 
 # Set parameters
 zmeanHDT <- 13
@@ -62,7 +63,7 @@ scale_cfr_temporal <- function(data_1_in, delay_fun = hospitalisation_to_death_t
 # Load data -----------------------------------------------------
 
 httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
-allDat <- read.csv(tf)
+allDat <- read_csv(tf)
 
 
 allDatDesc <- allDat %>% 
@@ -70,24 +71,45 @@ allDatDesc <- allDat %>%
   dplyr::mutate(dateRep = lubridate::dmy(dateRep))%>% 
   dplyr::rename(date = dateRep, new_cases = cases, new_deaths = deaths, country = countriesAndTerritories) %>%
   dplyr::select(date, country, new_cases, new_deaths) %>%
-  dplyr::filter(country != "CANADA", 
-                country != "Cases_on_an_international_conveyance_Japan")
-# Do analysis
+  dplyr::filter(!country %in% c("CANADA", "Cases_on_an_international_conveyance_Japan"))
+
+# Do analysis - remove all countries with cumsum deaths < 15
 allTogetherCleanA <- allDatDesc %>%
   dplyr::group_by(country) %>%
   padr::pad() %>%
   dplyr::mutate(new_cases = tidyr::replace_na(new_cases, 0),
                 new_deaths = tidyr::replace_na(new_deaths, 0)) %>%
-  dplyr::group_by(country) %>%
-  dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
-  dplyr::filter(cum_deaths > 0) %>%
-  dplyr::select(-cum_deaths) 
-
+  dplyr::mutate(cum_sum_deaths = cumsum(new_deaths)) %>%
+  dplyr::filter(cum_sum_deaths >= 15) %>%
+  dplyr::select(-cum_sum_deaths) %>% 
+  ungroup()
 
 
 # Plot rough reporting over time -----------------------------------------
 
 #countrypick <- "Denmark"
+#source file into this script?
+#could do cumsum on whole dataset
+
+get_plot_data <- function(country_name, data = allTogetherCleanA){
+  
+  true_cfr <- 1.4/100
+  
+  country_data <- data %>% 
+    filter(country == country_name) %>% 
+    mutate(date = date - zmeanHDT)
+    
+  cfr <- scale_cfr_temporal(country_data) %>% 
+    as_tibble() %>% 
+    mutate(reporting_estimate = true_cfr/cCFR) %>% 
+    mutate(reporting_estimate = pmin(reporting_estimate, 1))
+  
+  return(cfr)
+  
+}
+
+get_plot_data(country_name = 'Portugal') %>% pull(cCFR)
+
 countrypickList <- c("China","United_Kingdom","Germany","South_Korea",
                      "United_States_of_America","Denmark","Spain","Portugal")
 
