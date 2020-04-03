@@ -108,7 +108,7 @@ get_plot_data <- function(country_name, data = allTogetherCleanA){
   
 }
 
-get_plot_data(country_name = 'Portugal') %>% pull(cCFR)
+get_plot_data(country_name = 'Portugal') %>% pull(reporting_estimate)
 
 countrypickList <- c("China","United_Kingdom","Germany","South_Korea",
                      "United_States_of_America","Denmark","Spain","Portugal")
