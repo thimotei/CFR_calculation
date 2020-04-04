@@ -18,7 +18,7 @@ plot_country <- function(plot_data){
     ggplot2::geom_polygon(data = ci_poly, aes(x = x, y = y), fill = 'red', alpha = 0.2) +
     ggplot2::coord_cartesian(ylim = c(0, 1)) +
     ggplot2::ylab("Proportion of cases reported") +
-    ggplot2::ggtitle(plot_data$country %>% unique()) +
+    ggplot2::ggtitle(gsub("_", " ", plot_data$country %>% unique())) +
     cfr_plot_theme()
   
   return(p)

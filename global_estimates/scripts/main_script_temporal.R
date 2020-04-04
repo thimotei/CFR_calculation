@@ -9,6 +9,8 @@
 library(tidyverse)
 library(padr)
 library(mgcv)
+require(gridExtra)
+require(ggplot2)
 
 # Set paths
 setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
@@ -94,9 +96,12 @@ allTogetherCleanA <- allDatDesc %>%
 plot_country_names <- allTogetherCleanA %>% 
   mutate(death_cum_sum = cumsum(new_deaths)) %>% 
   filter(death_cum_sum >= 10) %>% 
+  mutate(max_deaths = max(death_cum_sum)) %>% 
+  arrange(-max_deaths) %>% 
   pull(country) %>% 
   unique()
 
+cfr_plots <- list()
 for (country_name in plot_country_names){
   plot_data <- get_plot_data(country_name = country_name)
   
@@ -104,12 +109,27 @@ for (country_name in plot_country_names){
   
   if ('try-error' %in% class(p)){next}
   
-  ggsave(paste0('./outputs/cfr_plots/', country_name, '.pdf'),
-         p,
-         width = 4, 
-         height = 4, 
-         units = 'in', 
-         useDingbats = FALSE)
-}
+  cfr_plots[[country_name]] = p
   
+}
+
+cfr_plot_grid = arrangeGrob(grobs = cfr_plots, ncol = 5)
+
+ggsave('./outputs/cfr_plots/cfr_plot_grid.pdf',
+       cfr_plot_grid,
+       width = 8, 
+       height = 10, 
+       units = 'in', 
+       useDingbats = FALSE,
+       dpi = 400)
+
+ggsave('./outputs/cfr_plots/cfr_plot_grid.png',
+       cfr_plot_grid,
+       width = 8, 
+       height = 10, 
+       units = 'in', 
+       dpi = 400)
+
+
+ 
   
