@@ -4,3 +4,5 @@
 .Ruserdata
 .DS_Store
 .cache
+global_estimates/outputs/cfr_plots/*.pdf
+global_estimates/outputs/cfr_plots/*.png
