@@ -15,6 +15,10 @@ setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
 if(grepl(Sys.info()["user"], pattern = "^adamkuchars(ki)?$")){setwd("~/Documents/GitHub/CFR_calculation/global_estimates/")}
 if(Sys.info()["user"] == 'hamishgibbs'){setwd("~/Documents/Covid-19/CFR_calculation/global_estimates")}
 
+#source data processing and plotting scripts
+source('./scripts/plot_temporal/get_plot_data.R')
+source('./scripts/plot_temporal/plot_country.R')
+
 # Set parameters
 zmeanHDT <- 13
 zsdHDT <- 12.7
@@ -73,95 +77,40 @@ allDatDesc <- allDat %>%
   dplyr::select(date, country, new_cases, new_deaths) %>%
   dplyr::filter(!country %in% c("CANADA", "Cases_on_an_international_conveyance_Japan"))
 
-# Do analysis - remove all countries with cumsum deaths < 15
+# Do analysis
 allTogetherCleanA <- allDatDesc %>%
   dplyr::group_by(country) %>%
   padr::pad() %>%
   dplyr::mutate(new_cases = tidyr::replace_na(new_cases, 0),
                 new_deaths = tidyr::replace_na(new_deaths, 0)) %>%
-  dplyr::mutate(cum_sum_deaths = cumsum(new_deaths)) %>%
-  dplyr::filter(cum_sum_deaths >= 15) %>%
-  dplyr::select(-cum_sum_deaths) %>% 
-  ungroup()
+  #What is this doing?
+  dplyr::group_by(country) %>%
+  dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
+  dplyr::filter(cum_deaths > 0) %>%
+  dplyr::select(-cum_deaths)
 
 
 # Plot rough reporting over time -----------------------------------------
 
-#countrypick <- "Denmark"
-#source file into this script?
-#could do cumsum on whole dataset
+plot_country_names <- allTogetherCleanA %>% 
+  mutate(death_cum_sum = cumsum(new_deaths)) %>% 
+  filter(death_cum_sum >= 10) %>% 
+  pull(country) %>% 
+  unique()
 
-get_plot_data <- function(country_name, data = allTogetherCleanA){
+for (country_name in plot_country_names){
+  plot_data <- get_plot_data(country_name = country_name)
   
-  true_cfr <- 1.4/100
+  p <- try(plot_country(plot_data = plot_data), silent = TRUE)
   
-  country_data <- data %>% 
-    filter(country == country_name) %>% 
-    mutate(date = date - zmeanHDT)
-    
-  cfr <- scale_cfr_temporal(country_data) %>% 
-    as_tibble() %>% 
-    mutate(reporting_estimate = true_cfr/cCFR) %>% 
-    mutate(reporting_estimate = pmin(reporting_estimate, 1))
+  if ('try-error' %in% class(p)){next}
   
-  return(cfr)
-  
+  ggsave(paste0('./outputs/cfr_plots/', country_name, '.pdf'),
+         p,
+         width = 4, 
+         height = 4, 
+         units = 'in', 
+         useDingbats = FALSE)
 }
-
-get_plot_data(country_name = 'Portugal') %>% pull(reporting_estimate)
-
-countrypickList <- c("China","United_Kingdom","Germany","South_Korea",
-                     "United_States_of_America","Denmark","Spain","Portugal")
-
-par(mfrow=c(2,4),mar=c(3,3,1,1),mgp=c(2,0.6,0))
-
-for(ii in 1:length(countrypickList)){
-  
-  countrypick <- countrypickList[ii]
-  
-  data_1_in_Pick <- allTogetherCleanA %>% filter(country==countrypick)
-  true_cfr <- 1.4/100
-  cum_sum_d <- cumsum(data_1_in_Pick$new_deaths)
-  pick_period <- (cum_sum_d>=15)
-  
-  out_cfr <- scale_cfr_temporal(data_1_in_Pick)
-  reporting_estimate <- (true_cfr/out_cfr$cCFR) %>% pmin(.,1)
-  reporting_estimate[!pick_period] <- NA # remove before deaths
-  xx_date <- data_1_in_Pick$date-zmeanHDT
-  
-  # Rough plot & set colours
-  plot(xx_date[pick_period],reporting_estimate[pick_period],ylim=c(0,1),ylab="proportion of cases reported",xlab="",main=countrypick)
-  
-  col_def <-   list(col1=rgb(1,0,0),col2=rgb(0.8,0.6,0),col3=rgb(0,0.8,0.8),col4=rgb(0.1,0.4,0.1),col5=rgb(1,0.4,1),col6=rgb(0.2,0,0.8),"dark grey")
-  col_def_F <- list(col1=rgb(1,0,0,0.2),col2=rgb(0.8,0.6,0,0.5),col3=rgb(0,0.8,0.8,0.5),col5=rgb(0.1,0.4,0.1,0.5),col6=rgb(1,0.4,1,0.5),col7=rgb(0.2,0,0.8,0.5),"grey")
-  
-  # Collate data and fit GAM model
-  data_fit <- cbind(xx_date,reporting_estimate)
-  data_fit <- as_tibble(data_fit); names(data_fit) <- c("date","report")
-  
-  modelB.P <- gam(report ~ s(date) , data = data_fit,family = "gaussian")
-  
-  # Predict data
-  xx_pred <- xx_date[pick_period]
-  preds <- predict(modelB.P, newdata = list(date=as.numeric(xx_pred)), type = "link", se.fit = TRUE)
-  critval <- 1.96; upperCI <- preds$fit + (critval * preds$se.fit); lowerCI <- preds$fit - (critval * preds$se.fit)
-  fit <- preds$fit
-  fitPlotF <- modelB.P$family$linkinv(fit); CI1plotF <- modelB.P$family$linkinv(upperCI);  CI2plotF <- modelB.P$family$linkinv(lowerCI)
-  
-  polygon(c(xx_pred,rev(xx_pred)),c(CI1plotF,rev(CI2plotF)),col=col_def_F[[1]],lty=0)
-  lines(xx_pred, fitPlotF ,col=col_def[[1]],lwd=2)
-  
-  # Estimate true symptomatic cases
-  
-  # Align case data with reporting
-  # estimate_cases <- head(data_1_in_Pick$new_cases,-zmeanHDT)/tail(reporting_estimate,-zmeanHDT) 
-  # date_match <- head(data_1_in_Pick$date,-zmeanHDT)
-  # 
-  #plot(date_match,estimate_cases,ylab="cases",xlab="",log="y",main=countrypick)
-  #lines(data_1_in_Pick$date,data_1_in_Pick$new_cases,col="blue")
-}
-  
-dev.copy(png,paste("outputs/calc_1.png",sep=""),units="cm",width=20,height=12,res=150)
-dev.off()
   
   
