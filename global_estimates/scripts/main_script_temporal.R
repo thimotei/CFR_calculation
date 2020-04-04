@@ -13,7 +13,6 @@ library(mgcv)
 # Set paths
 setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
 if(grepl(Sys.info()["user"], pattern = "^adamkuchars(ki)?$")){setwd("~/Documents/GitHub/CFR_calculation/global_estimates/")}
-if(Sys.info()["user"] == 'hamishgibbs'){setwd("~/Documents/Covid-19/CFR_calculation/global_estimates")}
 
 #source data processing and plotting scripts
 source('./scripts/plot_temporal/get_plot_data.R')
