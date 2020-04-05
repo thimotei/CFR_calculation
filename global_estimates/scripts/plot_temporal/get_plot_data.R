@@ -24,9 +24,9 @@ get_plot_data <- function(country_name, data = allTogetherCleanA){
            date = country_data$date,
            date_num = as.numeric(country_data$date),
            deaths = country_data$new_deaths,
-           cases_known_adj = cum_known_t * true_cfr) %>% 
+           cases_known = cum_known_t) %>% 
     filter(date >= death_threshold_date) %>% 
-    select(country, date, date_num, reporting_estimate, deaths, cases_known_adj)
+    select(country, date, date_num, reporting_estimate, deaths, cases_known)
   
   return(cfr)
   

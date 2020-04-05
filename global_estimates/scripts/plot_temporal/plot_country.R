@@ -1,31 +1,21 @@
-source('./scripts/plot_temporal/get_ci_poly.R')
+source('./scripts/plot_temporal/get_one_timeseries.R')
 source('./scripts/plot_temporal/cfr_plot_theme.R')
 
 #plot time varying cfr for a country
 plot_country <- function(plot_data){
-  
-  # modelB.P <- mgcv::gam(reporting_estimate ~ s(date_num) , data = plot_data, family = "gaussian")
-  
-  plot_data$log_offset <- log(plot_data$cases_known_adj)
-  
-  model <- mgcv::gam(deaths ~ s(date_num) + offset(log_offset), data = plot_data, family = "poisson")
-  
-  pred_data <- data.frame(date_num = plot_data$date_num,
-                          log_offset = 0)
-  preds <- stats::predict(model, newdata = pred_data, type = "link", se.fit = TRUE)
-  
-  # estimated reporting rate (expectation)
-  mu <- -preds$fit
-  sigma <- preds$se.fit
-  estimate <- exp(mu + (sigma ^ 2) / 2)
-  
-  # 95% confidence interval
-  ci_poly <- get_ci_poly(preds = preds, dates = plot_data$date)
-  
+
+  # get timeseries with the expectation, lower, and upper bounds of true CFR
+  expectation <- get_one_timeseries(cCFRBaseline, plot_data)
+  lower <- get_one_timeseries(cCFREstimateRange[1], plot_data)
+  upper <- get_one_timeseries(cCFREstimateRange[2], plot_data)
+
+  estimate <- expectation$estimate
+  ci_poly <- tibble::tibble(x = c(plot_data$date, rev(plot_data$date)),
+                            y = c(upper$upper, rev(lower$lower)))
+
   # clip all of these to (0, 1]
   estimate <- pmin(estimate, 1)
   ci_poly$y <- pmin(ci_poly$y, 1)
-  
   
   p <- plot_data %>% 
     ggplot2::ggplot() +
