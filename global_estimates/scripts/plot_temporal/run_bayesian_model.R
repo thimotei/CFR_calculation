@@ -12,8 +12,7 @@ run_bayesian_model <- function (data, n_inducing = 10) {
   times <- seq(min(data$date_num), max(data$date_num))
   
   # GP parameters for squared-exponential kernel plus a bias term (intercept)
-  lengthscale_raw <- normal(0, 1, truncation = c(0, Inf))
-  lengthscale <- lengthscale_raw * 100
+  lengthscale <- lognormal(4, 0.5)
   sigma <- normal(0, 1, truncation = c(0, Inf))
   temporal <- rbf(lengthscales = lengthscale,
                        variance = sigma ^ 2)
@@ -26,7 +25,7 @@ run_bayesian_model <- function (data, n_inducing = 10) {
   inducing_points <- seq(min(times), max(times), length.out = n_inducing + 1)[-1]
   
   # GP for the (probit-) reporting rate
-  z <- greta.gp::gp(times, kernel, tol = 1e-3)
+  z <- greta.gp::gp(times, kernel, tol = 1e-6)
   
   # convert to probabilities
   reporting_rate <- iprobit(z)
@@ -53,12 +52,12 @@ run_bayesian_model <- function (data, n_inducing = 10) {
   # draw a bunch of mcmc samples (parallelising for multicore efficiency)
   country <- data$country[1]
   message("running model for ", country)
-  draws <- mcmc(m, chains = 10, n_samples = 1000, one_by_one = TRUE)
+  draws <- mcmc(m, chains = 50, warmup = 1000, n_samples = 1000, one_by_one = TRUE)
   
   # check convergence before continuing
   r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
   n_eff <- coda::effectiveSize(draws)
-  decent_samples <- all(r_hats$psrf[, 1] <= 1.1) & all(n_eff > 1e3)
+  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) & all(n_eff > 500)
   if (!decent_samples) {
     stop ("posterior samples not sufficiently converged for ",
           country)
