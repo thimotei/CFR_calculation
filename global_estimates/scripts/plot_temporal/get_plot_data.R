@@ -14,7 +14,7 @@ get_plot_data <- function(country_name, data = allTogetherCleanA){
     filter(death_cum_sum >= 10) %>% 
     pull(date) %>% 
     min()
-  
+
   #return adjusted date and reporting_estimate
   cfr <- scale_cfr_temporal(country_data) %>% 
     as_tibble() %>% 
@@ -22,9 +22,11 @@ get_plot_data <- function(country_name, data = allTogetherCleanA){
     mutate(reporting_estimate = pmin(reporting_estimate, 1),
            country = country_data$country,
            date = country_data$date,
-           date_num = as.numeric(country_data$date)) %>% 
+           date_num = as.numeric(country_data$date),
+           deaths = country_data$new_deaths,
+           cases_known_adj = cum_known_t * true_cfr) %>% 
     filter(date >= death_threshold_date) %>% 
-    select(country, date, date_num, reporting_estimate)
+    select(country, date, date_num, reporting_estimate, deaths, cases_known_adj)
   
   return(cfr)
   
