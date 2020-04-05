@@ -5,11 +5,11 @@ source('./scripts/plot_temporal/cfr_plot_theme.R')
 plot_country <- function(plot_data){
 
   # get timeseries with the expectation, lower, and upper bounds of true CFR
-  expectation <- run_bayesian_model(plot_data)
+  prediction <- run_bayesian_model(plot_data)
 
-  estimate <- expectation$estimate
+  estimate <- prediction$estimate
   ci_poly <- tibble::tibble(x = c(plot_data$date, rev(plot_data$date)),
-                            y = c(upper$upper, rev(lower$lower)))
+                            y = c(prediction$upper, rev(prediction$lower)))
 
   p <- plot_data %>% 
     ggplot2::ggplot() +
