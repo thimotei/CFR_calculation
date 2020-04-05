@@ -1,22 +1,16 @@
-source('./scripts/plot_temporal/get_one_timeseries.R')
+source('./scripts/plot_temporal/run_bayesian_model.R')
 source('./scripts/plot_temporal/cfr_plot_theme.R')
 
 #plot time varying cfr for a country
 plot_country <- function(plot_data){
 
   # get timeseries with the expectation, lower, and upper bounds of true CFR
-  expectation <- get_one_timeseries(cCFRBaseline, plot_data)
-  lower <- get_one_timeseries(cCFREstimateRange[1], plot_data)
-  upper <- get_one_timeseries(cCFREstimateRange[2], plot_data)
+  expectation <- run_bayesian_model(plot_data)
 
   estimate <- expectation$estimate
   ci_poly <- tibble::tibble(x = c(plot_data$date, rev(plot_data$date)),
                             y = c(upper$upper, rev(lower$lower)))
 
-  # clip all of these to (0, 1]
-  estimate <- pmin(estimate, 1)
-  ci_poly$y <- pmin(ci_poly$y, 1)
-  
   p <- plot_data %>% 
     ggplot2::ggplot() +
     ggplot2::theme_bw() + 
