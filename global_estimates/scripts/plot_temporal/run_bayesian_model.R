@@ -52,15 +52,39 @@ run_bayesian_model <- function (data, n_inducing = 10) {
   # draw a bunch of mcmc samples (parallelising for multicore efficiency)
   country <- data$country[1]
   message("running model for ", country)
-  draws <- mcmc(m, chains = 50, warmup = 1000, n_samples = 1000, one_by_one = TRUE)
+  draws <- mcmc(m, chains = 50, warmup = 500, n_samples = 1000, one_by_one = TRUE)
   
   # check convergence before continuing
   r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
-  n_eff <- coda::effectiveSize(draws)
-  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) & all(n_eff > 500)
-  if (!decent_samples) {
-    stop ("posterior samples not sufficiently converged for ",
-          country)
+  #n_eff <- coda::effectiveSize(draws)
+  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
+  if (!decent_samples) 
+  {
+    draws <- extra_samples(draws, 2000, one_by_one = TRUE)
+  }
+  
+  r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
+  #n_eff <- coda::effectiveSize(draws)
+  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
+  if (!decent_samples) 
+  {
+    draws <- extra_samples(draws, 2000,  one_by_one = TRUE)
+  }
+  
+  r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
+  #n_eff <- coda::effectiveSize(draws)
+  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
+  if (!decent_samples) 
+  {
+    draws <- extra_samples(draws, 2000,  one_by_one = TRUE)
+  }
+  
+  r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
+  #n_eff <- coda::effectiveSize(draws)
+  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
+  if (!decent_samples) 
+  {
+    draws <- extra_samples(draws, 2000,  one_by_one = TRUE)
   }
   
   # get estimates

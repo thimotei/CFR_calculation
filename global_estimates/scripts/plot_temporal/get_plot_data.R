@@ -1,7 +1,7 @@
 #get time varying cfr data for a country
 get_plot_data <- function(country_name, data = allTogetherCleanA){
   
-  true_cfr <- 1.4/100
+  true_cfr <- 1.38/100
   
   #filter country data and adjust date
   country_data <- data %>% 
