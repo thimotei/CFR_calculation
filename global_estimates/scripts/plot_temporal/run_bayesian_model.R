@@ -1,6 +1,6 @@
 # fit a Bayesian GP regression model to deaths and known cases data, integrating
 # over uncertainty in the true CFR, and return the posterior mean and 95% CI
-run_bayesian_model <- function (data, n_inducing = 10, verbose = TRUE) {
+run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   
   # only fit to time points where there are known cases
   data <- data %>%
@@ -14,14 +14,14 @@ run_bayesian_model <- function (data, n_inducing = 10, verbose = TRUE) {
   # GP parameters for squared-exponential kernel plus a bias term (intercept)
   # for reporting rate
   lengthscale <- lognormal(4, 0.5)
-  sigma <- normal(0, 1, truncation = c(0, Inf))
+  sigma <- lognormal(-1, 1)
   temporal <- rbf(lengthscales = lengthscale,
                        variance = sigma ^ 2)
   intercept <- bias(1)
   reporting_kernel <- temporal + intercept
   
   # IID noise kernel for observation overdispersion (clumped death reports)
-  sigma_obs <- normal(0, 1, truncation = c(0, Inf))
+  sigma_obs <- normal(0, 0.5, truncation = c(0, Inf))
   observation_kernel <- white(sigma_obs ^ 2)
   
   # combined kernel (marginalises a bunch of parameters for easier sampling)
@@ -33,7 +33,7 @@ run_bayesian_model <- function (data, n_inducing = 10, verbose = TRUE) {
   inducing_points <- seq(min(times), max(times), length.out = n_inducing + 1)[-1]
   
   # GP for the (probit-) reporting rate
-  z <- greta.gp::gp(times, kernel)
+  z <- greta.gp::gp(times, inducing = inducing_points, kernel)
   
   # convert to probabilities
   reporting_rate <- iprobit(z)
@@ -57,56 +57,55 @@ run_bayesian_model <- function (data, n_inducing = 10, verbose = TRUE) {
   # construct the model
   m <- model(reporting_rate)
   
+  n_chains <- 50
+  
+  # sample initial values for hyperparameters from within their priors
+  inits <- replicate(
+    n_chains,
+    initials(
+      lengthscale = rlnorm(1, 4, 0.5),
+      sigma = abs(rnorm(1, 0, 0.5)),
+      sigma_obs = abs(rnorm(1, 0, 0.5)),
+      baseline_cfr_perc = max(0.001, min(99.999,
+        rnorm(1, true_cfr_mean, true_cfr_sigma)
+      ))
+    ),
+    simplify = FALSE
+  )
+  
   if (verbose) {
     country <- data$country[1]
     message("running model for ", country)
   }
   
-  # draw a bunch of mcmc samples (parallelising for multicore efficiency)
+  # draw a bunch of mcmc samples
   draws <- mcmc(
     m,
-    chains = 50,
-    warmup = 500,
+    sampler = hmc(Lmin = 15, Lmax = 20),
+    chains = n_chains,
+    warmup = 1000,
     n_samples = 1000,
+    initial_values = inits,
     one_by_one = TRUE,
     verbose = verbose
   )
   
-  # check convergence before continuing
-  r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
-  #n_eff <- coda::effectiveSize(draws)
-  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
-  if (!decent_samples) 
-  {
-    draws <- extra_samples(draws, 2000, one_by_one = TRUE)
-  }
-  
-  r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
-  #n_eff <- coda::effectiveSize(draws)
-  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
-  if (!decent_samples) 
-  {
-    draws <- extra_samples(draws, 2000,  one_by_one = TRUE)
-  }
-  
-  r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
-  #n_eff <- coda::effectiveSize(draws)
-  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
-  if (!decent_samples) 
-  {
-    draws <- extra_samples(draws, 2000,  one_by_one = TRUE)
-  }
-  
-  r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)
-  #n_eff <- coda::effectiveSize(draws)
-  decent_samples <- all(r_hats$psrf[, 1] <= 1.2) 
-  if (!decent_samples) 
-  {
-    draws <- extra_samples(draws, 2000,  one_by_one = TRUE)
+  # extend the number of chains until convergence (or give up)
+  for (i in 1:5) {
+    r_hats <- coda::gelman.diag(draws, autoburnin = FALSE, multivariate = FALSE)$psrf[, 1]
+    n_eff <- coda::effectiveSize(draws)
+    decent_samples <- max(r_hats) <= 1.1 & min(n_eff) > 1000 
+    if (!decent_samples) {
+      if (verbose) {
+        message("maximum R-hat: ", max(r_hats),
+                "\nminimum n-eff: ", min(n_eff))
+      }
+      draws <- extra_samples(draws, 2000, one_by_one = TRUE, verbose = verbose)
+    }
   }
   
   # predict without IID noise (true reporting rate, without clumped death reporting)
-  # (could predict to more granular times here too)
+  # could predict to more granular times here too
   z_smooth <- greta.gp::project(z, times, kernel = reporting_kernel)
   reporting_rate_smooth <- iprobit(z_smooth)
   draws_pred <- calculate(reporting_rate_smooth, values = draws)

@@ -120,17 +120,17 @@ still_to_do_fits <- setdiff(plot_country_names, tmp_file_names2)
 cfr_plots <- list()
 for (country_name in still_to_do_fits){
   tryCatch({ 
+    
     plot_data <- get_plot_data(country_name = country_name)
     
     prediction <- run_bayesian_model(plot_data)
     
-    estimate <- prediction$estimate
+    saveRDS(prediction, paste0("outputs/fit_data/",country_name, "_fit" ,'.rds'))
+    
     ci_poly <- tibble::tibble(x = c(plot_data$date, rev(plot_data$date)),
                               y = c(prediction$upper, rev(prediction$lower)))
     
-    
-    saveRDS(prediction, paste0("outputs/fit_data/",country_name, "_fit" ,'.rds'))
-    p <- try(plot_country(plot_data, prediction, estimate, ci_poly))
+    p <- try(plot_country(plot_data, prediction$estimate, ci_poly))
     
     if ('try-error' %in% class(p)){next}
     
