@@ -88,7 +88,8 @@ allTogetherCleanA <- allDatDesc %>%
   dplyr::group_by(country) %>%
   dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
   dplyr::filter(cum_deaths > 0) %>%
-  dplyr::select(-cum_deaths)
+  dplyr::select(-cum_deaths) %>%
+  dplyr::
 
 
 # Plot rough reporting over time -----------------------------------------
@@ -99,7 +100,8 @@ plot_country_names <- allTogetherCleanA %>%
   mutate(max_deaths = max(death_cum_sum)) %>% 
   arrange(-max_deaths) %>% 
   pull(country) %>% 
-  unique()
+  group_by(country) %>% 
+  filter(n() >= 5)
 
 cfr_plots <- list()
 for (country_name in plot_country_names){

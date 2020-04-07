@@ -4,9 +4,9 @@ get_one_timeseries <- function (true_cfr, data) {
   
   # fit model
   data <- data %>%
-    mutate(log_offset = log(cases_known * true_cfr / 100))
+    mutate(log_offset = log(cases_known * true_cfr))
   
-  model <- mgcv::gam(deaths ~ s(date_num) + offset(log_offset),
+  model <- mgcv::gam(deaths ~ s(date_num, k = 3) + offset(log_offset),
                      data = data,
                      family = "poisson")
   
