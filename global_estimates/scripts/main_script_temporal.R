@@ -116,7 +116,10 @@ for (country_name in plot_country_names){
   
 }
 
-cfr_plot_grid = arrangeGrob(grobs = cfr_plots, ncol = 4)
+cfr_plot_grid = arrangeGrob(grobs = cfr_plots,
+                            ncol = 4,
+                            left = "Percentage of symptomatic cases reported", 
+                            rot = 90)
 
 # ggsave('outputs/cfr_plot_grid.pdf',
 #        cfr_plot_grid,

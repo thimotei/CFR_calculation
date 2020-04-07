@@ -51,7 +51,7 @@ To estimate the percentage of symptomatic COVID-19 cases reported in different c
 
 ### Temporal variation
 
-```{r fig_Main, echo=FALSE, fig.align='center', fig.cap="_Figure 1: Temporal variation in reporting rate. We calculate the percentage of cases reported on each day a country has had more than ten deaths. We then fit a Generalised Additive Model to these data (see Temporal variation model fitting section for details), highlighting the temporal trend of each countries reporting rate. The red shaded region is the 95% CI of fitted GAM._", out.width = '100%'}
+```{r fig_Main, echo=FALSE, fig.align='center', fig.cap="_Figure 1: Temporal variation in reporting rate. We calculate the percentage of symptomatic cases reported on each day a country has had more than ten deaths. We then fit a Generalised Additive Model to these data (see Temporal variation model fitting section for details), highlighting the temporal trend of each countries reporting rate. The red shaded region is the 95% CI of fitted GAM._", out.width = '100%'}
 knitr::include_graphics("../outputs/figure_1.png")
 ```
 
@@ -75,7 +75,7 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
  #subPlotData3 <- dataPlot %>% filter(confidence == "Countries that have reported fewer than or equal to 10 deaths")
 ```
 
-```{r include = TRUE, fig.width = 13, fig.height = 13}
+```{r include = TRUE, fig.width = 13, fig.height = 15}
   plot <- dataPlot %>% 
   ggplot2::ggplot(ggplot2::aes(x = country)) +
   #ggplot2::geom_linerange(ggplot2::aes(ymin = bottom, ymax = top), col = "#344b85", size = 4,  alpha = 0.7) +
@@ -88,7 +88,7 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
   ggplot2::theme(axis.text.x = element_text(angle = 0, size = 15), axis.text.y = element_text(size = 15)) +
   ggplot2::theme(legend.position = "none") +
   ggplot2::guides(col = ggplot2::guide_legend(nrow = 2)) +
-  ggplot2::labs(x = "Countries", y = "Percentage of cases reported") + 
+  ggplot2::labs(x = "Countries", y = "Percentage of symptomatic cases reported") + 
   ggplot2::coord_flip()
   plot
 ```
@@ -99,7 +99,7 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
 
 ```{r include=TRUE}
 knitr::kable(dataTable, col.names = c("Country",
-                                        "Percentage of cases reported (95% CI)",
+                                        "Percentage of symptomatic cases reported (95% CI)",
                                         "Total cases",
                                         "Total deaths"), 
                                         full_width = F, digits = 2)
@@ -149,6 +149,8 @@ The following is a list of the other prominent assumptions made in our analysis:
 * All results are linked and biased by the baseline CFR, assumed at 1.4% [@guan2020clinical].
 
 * The under-reporting estimate is sensitive to the baseline CFR, meaning that small errors in it lead to large errors in the estimate for under-reporting.
+
+* There are several sources of uncertainty in this analysis: the reported mean and SD of the delay distribution; the cCFR for each country (on each day) and the baseline CFR. We use the lower and upper mean and SD of the delay distribution to produce the widest interval. The other two uncertainties are just carried through directly in the subsequent calculations, which is crude. An ongoing extension is developing this into a fully Bayesian model, which deals with these different uncertainties more rigorously.
 
 ## Code and data availability
 

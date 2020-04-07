@@ -33,6 +33,8 @@ cd ~/Documents/lshtm/github\ repos/CFR_calculation/
 
 Rscript global_estimates/scripts/main_script_clean.R
 
+Rscript global_estimates/scripts/main_script_temporal.R
+
 R -e "rmarkdown::render('global_estimates/Rmd/global_cfr_estimates_public.rmd', run_pandoc = FALSE)"
 
 Rscript -e "EpiNow::copy_report(
