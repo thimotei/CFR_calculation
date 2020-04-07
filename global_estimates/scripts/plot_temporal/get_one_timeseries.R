@@ -4,11 +4,11 @@ get_one_timeseries <- function (true_cfr, data) {
   
   # fit model
   data <- data %>%
-    mutate(log_offset = log(cases_known * true_cfr))
+    mutate(log_offset = log(cases_known * true_cfr/100))
   
   model <- mgcv::gam(deaths ~ s(date_num, k = 3) + offset(log_offset),
                      data = data,
-                     family = "poisson")
+                     family = stats::poisson)
   
   # predict timeseries without log-offset to get timeseries -log(reporting rate)
   pred_data <- data.frame(date_num = data$date_num,

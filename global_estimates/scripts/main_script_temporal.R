@@ -88,26 +88,27 @@ allTogetherCleanA <- allDatDesc %>%
   dplyr::group_by(country) %>%
   dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
   dplyr::filter(cum_deaths > 0) %>%
-  dplyr::select(-cum_deaths) %>%
-  dplyr::
+  dplyr::select(-cum_deaths)
 
 
 # Plot rough reporting over time -----------------------------------------
 
 plot_country_names <- allTogetherCleanA %>% 
-  mutate(death_cum_sum = cumsum(new_deaths)) %>% 
-  filter(death_cum_sum >= 10) %>% 
-  mutate(max_deaths = max(death_cum_sum)) %>% 
-  arrange(-max_deaths) %>% 
-  pull(country) %>% 
-  group_by(country) %>% 
-  filter(n() >= 5)
+  dplyr::mutate(death_cum_sum = cumsum(new_deaths)) %>% 
+  dplyr::filter(death_cum_sum >= 10) %>% 
+  dplyr::mutate(max_deaths = max(death_cum_sum)) %>% 
+  dplyr::arrange(-max_deaths) %>% 
+  dplyr::group_by(country) %>% 
+  dplyr::filter(n() >= 8) %>%
+  dplyr::pull(country) %>% 
+  unique()
+
 
 cfr_plots <- list()
 for (country_name in plot_country_names){
   plot_data <- get_plot_data(country_name = country_name)
   
-  p <- try(plot_country(plot_data = plot_data), silent = TRUE)
+  p <- try(plot_country(plot_data = plot_data))
   
   if ('try-error' %in% class(p)){next}
   
@@ -115,20 +116,20 @@ for (country_name in plot_country_names){
   
 }
 
-cfr_plot_grid = arrangeGrob(grobs = cfr_plots, ncol = 5)
+cfr_plot_grid = arrangeGrob(grobs = cfr_plots, ncol = 4)
 
-ggsave('./outputs/cfr_plots/cfr_plot_grid.pdf',
-       cfr_plot_grid,
-       width = 8, 
-       height = 10, 
-       units = 'in', 
-       useDingbats = FALSE,
-       dpi = 400)
+# ggsave('outputs/cfr_plot_grid.pdf',
+#        cfr_plot_grid,
+#        width = 6, 
+#        height = 18, 
+#        units = 'in', 
+#        useDingbats = FALSE,
+#        dpi = 400)
 
-ggsave('./outputs/cfr_plots/cfr_plot_grid.png',
+ggsave('outputs/figure_1.png',
        cfr_plot_grid,
-       width = 8, 
-       height = 10, 
+       width =6, 
+       height = 18, 
        units = 'in', 
        dpi = 400)
 

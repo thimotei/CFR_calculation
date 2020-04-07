@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = FALSE)
 target_date <- Sys.Date()
 ```
 
-*Timothy W Russell<sup>&ast;</sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
+*Timothy W Russell<sup>&ast;</sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Nick Holding, Hamish Gibbs, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
 
 <sup> † </sup> authors contributed equally
 
@@ -43,11 +43,19 @@ To estimate the percentage of symptomatic COVID-19 cases reported in different c
 
 * Using the distribution of the delay from hospitalisation-to-death for cases that are fatal, we can estimate how many cases so far are expected to have known outcomes (i.e. death or recovery), and hence adjust the naive estimates of CFR to account for these delays.
 
-* The adjusted CFR does not account for under-reporting. However, the best available estimates of CFR (adjusting or controlling for under-reporting) are in the 1% - 1.5% range. We assume a baseline CFR, taken from a large study in China, of 1.38% (95% crI: 1.23–1.53%)[@verity2020estimates]. If a country has an adjusted CFR that is higher (e.g. 20%), it suggests that only a fraction of cases have been reported (in this case, $\frac{1.38}{20} = 6.9\%$ cases reported approximately).
+* The adjusted CFR does not account for under-reporting. However, the best available estimates of CFR (adjusting or controlling for under-reporting) are in the 1% - 1.5% range [@russell2020estimating; @verity2020estimates; @guan2020clinical; @shim2020estimating]. Large studies in China and South Korea estimating the CFR at 1.38% (95% CrI: 1.23–1.53%)[@verity2020estimates] and 1.4% (95% CrI: 1.2-1.7%)[@shim2020estimating] respectively. Based on these studies, and for simplicity, we assume a baseline CFR of 1.4% for our analysis.
+
+* If a country has an adjusted CFR that is higher (e.g. 20%), it suggests that only a fraction of cases have been reported (in this case, 1.420=7.0% cases reported approximately).
 
 ## Current estimates for percentage of symptomatic cases reported for countries with greater than ten deaths {.tabset}
 
-### Figure
+### Temporal variation
+
+```{r fig_Main, echo=FALSE, fig.align='center', fig.cap="_Figure 1: Temporal variation in reporting rate. We calculate the percentage of cases reported on each day a country has had more than ten deaths. We then fit a Generalised Additive Model to these data (see Temporal variation model fitting section for details), highlighting the temporal trend of each countries reporting rate. The red shaded region is the 95% CI of fitted GAM._", out.width = '100%'}
+knitr::include_graphics("../outputs/figure_1.png")
+```
+
+### Current estimates
 
 ```{r include = FALSE}
 allTogetherClean <- readRDS("../data/reportDataFinal.rds")
@@ -85,9 +93,9 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
   plot
 ```
 
-*Figure 1: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
+*Figure 2: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
 
-### Table
+### Table of current estimates
 
 ```{r include=TRUE}
 knitr::kable(dataTable, col.names = c("Country",
@@ -106,21 +114,29 @@ During an outbreak, the naive CFR (nCFR), i.e. the ratio of reported deaths date
 
 We assumed the delay from confirmation-to-death followed the same distribution as estimated hospitalisation-to-death, based on data from the COVID-19 outbreak in Wuhan, China, between the 17th December 2019 and the 22th January 2020, accounting right-censoring in the data as a result of as-yet-unknown disease outcomes (Figure 1, panels A and B in [@@linton2020incubation]). The distribution used is a Lognormal fit, has a mean delay of 13 days and a standard deviation of 12.7 days [@linton2020incubation].
 
-To correct the CFR, we use the case and death incidence data to estimate the number of cases with known outcomes [@nishiura2009early; @russell2020estimating]:
+To correct the CFR, we use the case and death incidence data to estimate the proportion of cases with known outcomes [@nishiura2009early; @russell2020estimating]:
 
 $$
-u_{t} = \frac{\sum_{i = 0}^t \sum_{j = 0}^{\infty} c_{i-j} f_j}{\sum_{i = 0}^t c_i},
+u_{t} = \frac{ \sum_{j = 0}^{t} c_{t-j} f_j}{c_t},
 $$ 
 
-where $u_t$ represents the underestimation of the known outcomes [@kucharski2014case; @nishiura2009early; @russell2020estimating] and is used to scale the value of the cumulative number of cases in the denominator in the calculation of the cCFR, $c_{t}$ is the daily case incidence at time, $t$ and $f_t$ is the proportion of cases with delay of $t$ between confirmation and death.
+where $u_t$ represents the underestimation of the proportion of cases with known outcomes [@kucharski2014case; @nishiura2009early; @russell2020estimating] and is used to scale the value of the cumulative number of cases in the denominator in the calculation of the cCFR, $c_{t}$ is the daily case incidence at time, $t$ and $f_t$ is the proportion of cases with delay of $t$ between confirmation and death.
 
 ## Approximating the proportion of symptomatic cases reported
 
-At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outcome, but not under-reporting, have been calculated. These estimates range between 1% and 1.5% [@russell2020estimating; @verity2020estimates; @guan2020clinical]. We assume a CFR of 1.38% (95% crI 1.23% - 1.53%), taken from a recent large study [@verity2020estimates], as a baseline CFR. We use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation $\frac{1.38\%}{\text{cCFR}}$ of each country to estimate an approximate fraction of cases reported.
+At this stage, raw estimates of the CFR of COVID-19 correcting for delay to outcome, but not under-reporting, have been calculated. These estimates range between 1% and 1.5% [@russell2020estimating; @verity2020estimates; @guan2020clinical]. We assume a CFR of 1.4% (95% CrI: 1.2-1.7%), taken from a recent large study [@guan2020clinical], as a baseline CFR. We use it to approximate the potential level of under-reporting in each country. Specifically, we perform the calculation $\frac{1.4\%}{\text{cCFR}}$ of each country to estimate an approximate fraction of cases reported.
+
+## Temporal variation model fitting
+
+We estimate the level of under-reporting on every day for each country that has had more than ten deaths. We then fit a Generalised Additive Model (GAM) of the form
+$$ \mathbb{E}[\log(D)] = \beta_0 + \beta_1 x_1 + ... + \beta_p x_p,$$
+specifying a Poisson distribution on deaths (D) as the response variable. The model has a log-link function and a log-offset ($\kappa$) consisting of the daily known-outcomes $u_t$ and the cCFR estimate for that country on that day $\text{cfr}_t$. The model can then be written as
+$$ D \sim s(t) + \underbrace{\log(u_t c_t) + \log(\text{cfr}_t)}_{:=log(κ)} $$
+where $s(t)$ is a smoothing spline, fitted through the time points (days) for which we have data.
 
 ## Limitations
 
-Implicit in assuming that the under-reporting is $\frac{1.38\%}{\text{cCFR}}$ for a given country is that the deviation away from the assumed 1.38% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1.1% CFR estimates, along with many other country specific factors.
+Implicit in assuming that the under-reporting is $\frac{1.4\%}{\text{cCFR}}$ for a given country is that the deviation away from the assumed 1.4% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1.4% CFR estimates, along with many other country specific factors.
 
 The following is a list of the other prominent assumptions made in our analysis:
 
@@ -130,9 +146,9 @@ The following is a list of the other prominent assumptions made in our analysis:
 
 * Severity of COVID-19 is known to increase with age. Therefore, countries with older populations will naturally see higher death rates. We are extending this analysis to adjust for the age distribution for countries with more than five reported deaths and where age distribution data is available.
 
-* All results are linked and biased by the baseline CFR, assumed at 1.38% [@verity2020estimates].
+* All results are linked and biased by the baseline CFR, assumed at 1.4% [@guan2020clinical].
 
-* The under-reporting estimate is very sensitive to the baseline CFR, meaning that small errors in it lead to large errors in the estimate for under-reporting.
+* The under-reporting estimate is sensitive to the baseline CFR, meaning that small errors in it lead to large errors in the estimate for under-reporting.
 
 ## Code and data availability
 
