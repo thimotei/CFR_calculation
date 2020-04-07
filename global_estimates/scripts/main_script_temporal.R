@@ -128,10 +128,10 @@ cfr_plot_grid = arrangeGrob(grobs = cfr_plots, ncol = 4)
 
 ggsave('outputs/figure_1.png',
        cfr_plot_grid,
-       width =6, 
-       height = 18, 
+       width =11, 
+       height = 25, 
        units = 'in', 
-       dpi = 400)
+       dpi = 800)
 
 
  

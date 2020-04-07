@@ -93,7 +93,7 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
   plot
 ```
 
-*Figure 2: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Dark blue shading is the 25% - 75% confidence range and light blue is 2.5% - 97.5% confidence range*
+*Figure 2: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Blue shading is the 2.5% - 97.5% confidence range.*
 
 ### Table of current estimates
 
