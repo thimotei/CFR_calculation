@@ -35,7 +35,7 @@ run_bayesian_model <- function (data, n_inducing = 10) {
   # Gaussian distribution, truncated to allowable values.
   true_cfr_mean <- cCFRBaseline
   true_cfr_sigma <- mean(abs(cCFREstimateRange - cCFRBaseline)) / 1.96
-  baseline_cfr_perc <- normal(true_cfr_mean, true_cfr_sigma, truncation = c(0, 1))
+  baseline_cfr_perc <- normal(true_cfr_mean, true_cfr_sigma, truncation = c(0, 100))
   
   # compute the expected number of deaths at each timepoint, given the true CFR,
   # number of reported cases with known outcomes, and reporting rate
