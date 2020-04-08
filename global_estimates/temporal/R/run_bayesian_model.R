@@ -41,8 +41,8 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   # distribution over plausible baseline CFR values from China study. The 95%
   # CIs are symmetric around the estimate, so we assume it's an approximately
   # Gaussian distribution, truncated to allowable values.
-  true_cfr_mean <- cCFRBaseline
-  true_cfr_sigma <- mean(abs(cCFREstimateRange - cCFRBaseline)) / 1.96
+  true_cfr_mean <- CFRBaseline
+  true_cfr_sigma <- mean(abs(CFREstimateRange - CFRBaseline)) / 1.96
   baseline_cfr_perc <- normal(true_cfr_mean, true_cfr_sigma, truncation = c(0, 100))
   
   # compute the expected number of deaths at each timepoint, given the true CFR,

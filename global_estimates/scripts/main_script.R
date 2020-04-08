@@ -1,13 +1,13 @@
 # Code to calculate estimates for under-reporting as of today
 # Author: Tim Russell
 
-# Source functions 
-source("R/scale_CFR.R")
-source("R/delay_distributions.R")
-source("R/table_of_estimates.R")
-
 # Set paths
-here::here()
+setwd(here::here())
+
+# Source functions 
+source("global_estimates/R/scale_CFR.R")
+source("global_estimates/R/delay_distributions.R")
+source("global_estimates/R/table_of_estimates.R")
 
 # setting the baseline CFR
 cCFRBaseline <- 1.4
@@ -88,4 +88,4 @@ reportDataFinal <- finalRes %>%
                                                        "% (",lower*100,"% - ",upper*100,"%)"))
 
 # saving the output
-saveRDS(reportDataFinal, "data/reportDataFinal.rds")
+saveRDS(reportDataFinal, "global_estimates/data/reportDataFinal.rds")

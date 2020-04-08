@@ -1,7 +1,5 @@
-# Code to estimate reporting
-
-# Sanbox to look at temporal variation in reporting
-
+# Temporal variation in reporting - bayesian model framework
+# Fit gaussian process model using greta.gp to under-reporting estimates over time
 
 # Set up paths and parameters ---------------------------------------------
 
@@ -15,63 +13,34 @@ library(greta)
 library(greta.gp)
 
 # Set paths
-setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
-if(grepl(Sys.info()["user"], pattern = "^adamkuchars(ki)?$")){setwd("~/Documents/GitHub/CFR_calculation/global_estimates/")}
+setwd(here::here())
 
 #source data processing and plotting scripts
-source('./scripts/plot_temporal/get_plot_data.R')
-source('./scripts/plot_temporal/plot_country.R')
+source('CFR_calculation/global_estimates/temporal/R/get_plot_data.R')
+source('CFR_calculation/global_estimates/temporal/R/plot_country.R')
+source('CFR_calculation/global_estimates/temporal/R/run_bayesian_model.R')
+source('CFR_calculation/global_estimates/temporal/R/cfr_plot_theme.R')
+source('CFR_calculation/global_estimates/temporal/R/scale_cfr_temporal.R')
+
+# setting baseline level CFR
+CFRBaseline <- 1.4
+CFREstimateRange <- c(1.2, 1.7)
 
 # Set parameters
-zmeanHDT <- 13
-zsdHDT <- 12.7
-zmedianHDT <- 9.1
-muHDT <- log(zmedianHDT)
-sigmaHDT <- sqrt(2*(log(zmeanHDT) - muHDT))
-cCFRBaseline <- 1.38
-cCFREstimateRange <- c(1.23, 1.53)
-#cCFRIQRRange <- c(1.3, 1.4)
+mean <- 13
+median <- 9.1
 
+mu <- log(median)
+sigma <- sqrt(2*(log(mean) - mu))
 
 # Hospitalisation to death distribution
 hospitalisation_to_death_truncated <- function(x) {
-  plnorm(x + 1, muHDT, sigmaHDT) - plnorm(x, muHDT, sigmaHDT)
+  plnorm(x + 1, mu, sigma) - plnorm(x, mu, sigma)
 }
-
-
-# Define CFR function -----------------------------------------------------
-
-# Function to work out correction CFR
-scale_cfr_temporal <- function(data_1_in, delay_fun = hospitalisation_to_death_truncated){
-
-  case_incidence <- data_1_in$new_cases
-  death_incidence <- data_1_in$new_deaths
-  cumulative_known_t <- NULL # cumulative cases with known outcome at time tt
-  # Sum over cases up to time tt
-  for(ii in 1:nrow(data_1_in)){
-    known_i <- 0 # number of cases with known outcome at time ii
-    for(jj in 0:(ii - 1)){
-      known_jj <- (case_incidence[ii - jj]*delay_fun(jj))
-      known_i <- known_i + known_jj
-    }
-    cumulative_known_t <- c(cumulative_known_t,known_i) # Tally cumulative known
-  }
-  
-  # naive CFR value
-  b_tt <- sum(death_incidence)/sum(case_incidence) 
-  # corrected CFR estimator
-  p_tt <- (death_incidence/cumulative_known_t) %>% pmin(.,1)
-  
-  data.frame(nCFR = b_tt, cCFR = p_tt, total_deaths = sum(death_incidence), 
-             cum_known_t = round(cumulative_known_t), total_cases = sum(case_incidence))
-}
-
 
 # Load data -----------------------------------------------------
-
 httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
 allDat <- read_csv(tf)
-
 
 allDatDesc <- allDat %>% 
   dplyr::arrange(countriesAndTerritories, dateRep) %>% 
@@ -107,22 +76,11 @@ plot_country_names <- allTogetherCleanA %>%
   unique()
 
 
-plot_country_names_temp <- plot_country_names[15:length(plot_country_names)]
-
-# temporary piece of code to work out which countries haven't been fitted yet
-completed_fits <- list.files("outputs/cfr_plots/")
-tmp_file_names <- tools::file_path_sans_ext(completed_fits)
-tmp_file_names2 <- gsub("_plot","", tmp_file_names)
-
-still_to_do_fits <- setdiff(plot_country_names, tmp_file_names2)
-
-
 cfr_plots <- list()
-for (country_name in still_to_do_fits){
+for (country_name in plot_country_names){
   tryCatch({ 
     
-    plot_data <- get_plot_data(country_name = country_name)
-    
+    plot_data <- get_plot_data(country_name = "Germany", CFRBaseline = CFRBaseline)
     prediction <- run_bayesian_model(plot_data)
     
     saveRDS(prediction, paste0("outputs/fit_data/",country_name, "_fit" ,'.rds'))
@@ -148,6 +106,7 @@ for (country_name in still_to_do_fits){
   
 }
 
+cCFRBaseline
 
 cfr_plot_grid = arrangeGrob(grobs = cfr_plots, ncol = 1)
 
