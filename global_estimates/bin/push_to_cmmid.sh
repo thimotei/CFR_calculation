@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 
 # Get or update CMMID
@@ -7,7 +7,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo "$DIR"
 
-cd ..
+cd ../..
 
 base_url="https://github.com/cmmid/"
 project="cmmid.github.io"
@@ -42,7 +42,7 @@ Rscript -e "EpiNow::copy_report(
                report = 'global_estimates/Rmd/global_cfr_estimates_public.html',
                date = Sys.Date(),
                lines_to_cut = 1:7,
-               report_target = '../cmmid.github.io/topics/covid19/severity/_posts/2020-03-22-global_cfr_estimates.html')"
+               report_target = 'cmmid.github.io/topics/covid19/severity/_posts/2020-03-22-global_cfr_estimates.html')"
 
 
 # Update Repo

@@ -17,6 +17,8 @@ authors:
     equal: 1
   - id: sam_abbott
     equal: 1
+  - id: nick_golding
+  - id: hamish_gibbs
   - id: chris_jarvis
   - id: kevin_vanzandvoort
   - id: ncov-group
