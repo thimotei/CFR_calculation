@@ -1,17 +1,6 @@
 # Temporal variation in reporting - bayesian model framework
 # Fit gaussian process model using greta.gp to under-reporting estimates over time
 
-# Set up paths and parameters ---------------------------------------------
-
-# Load libraries
-library(tidyverse)
-library(padr)
-library(mgcv)
-require(gridExtra)
-require(ggplot2)
-library(greta)
-library(greta.gp)
-
 # Set paths
 setwd(here::here())
 
@@ -42,20 +31,17 @@ hospitalisation_to_death_truncated <- function(x) {
 httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
 allDat <- read_csv(tf)
 
-allDatDesc <- allDat %>% 
+# munging data into correct format and selecting countries with greater than 10 deaths
+allTogetherClean <- allDat %>% 
   dplyr::arrange(countriesAndTerritories, dateRep) %>% 
   dplyr::mutate(dateRep = lubridate::dmy(dateRep))%>% 
   dplyr::rename(date = dateRep, new_cases = cases, new_deaths = deaths, country = countriesAndTerritories) %>%
   dplyr::select(date, country, new_cases, new_deaths) %>%
-  dplyr::filter(!country %in% c("CANADA", "Cases_on_an_international_conveyance_Japan"))
-
-# Do analysis
-allTogetherCleanA <- allDatDesc %>%
+  dplyr::filter(!country %in% c("CANADA", "Cases_on_an_international_conveyance_Japan")) %>%
   dplyr::group_by(country) %>%
   padr::pad() %>%
   dplyr::mutate(new_cases = tidyr::replace_na(new_cases, 0),
                 new_deaths = tidyr::replace_na(new_deaths, 0)) %>%
-  #What is this doing?
   dplyr::group_by(country) %>%
   dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
   dplyr::filter(cum_deaths > 0) %>%
@@ -63,7 +49,7 @@ allTogetherCleanA <- allDatDesc %>%
 
 
 # Plot rough reporting over time -----------------------------------------
-plot_country_names <- allTogetherCleanA %>% 
+plot_country_names <- allTogetherClean %>% 
   mutate(death_cum_sum = cumsum(new_deaths)) %>% 
   filter(death_cum_sum >= 10) %>%
   mutate(max_deaths = max(death_cum_sum)) %>% 
@@ -76,6 +62,7 @@ plot_country_names <- allTogetherCleanA %>%
   unique()
 
 
+# running loop over all countries, fitting the model, saving the fit data and making each plot
 cfr_plots <- list()
 for (country_name in plot_country_names){
   tryCatch({ 
@@ -92,7 +79,7 @@ for (country_name in plot_country_names){
     
     if ('try-error' %in% class(p)){next}
     
-    ggsave(paste0("outputs/cfr_plots/", country_name, "_plot.pdf"),
+    ggplot2::ggsave(paste0("outputs/cfr_plots/", country_name, "_plot.pdf"),
            p,
            width = 8, 
            height = 10, 
@@ -102,23 +89,15 @@ for (country_name in plot_country_names){
     
     cfr_plots[[country_name]] = p 
     
-  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
-  
+  },
+  error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
 
-cCFRBaseline
+# arranging all of the plots in cfr_plots
+cfr_plot_grid = gridExtra::arrangeGrob(grobs = cfr_plots, ncol = 1)
 
-cfr_plot_grid = arrangeGrob(grobs = cfr_plots, ncol = 1)
-
-ggsave('./outputs/cfr_plots/cfr_plot_grid.pdf',
-       cfr_plot_grid,
-       width = 8, 
-       height = 10, 
-       units = 'in', 
-       useDingbats = FALSE,
-       dpi = 400)
-
-ggsave('./outputs/cfr_plots/cfr_plot_grid.png',
+# saving all of the plots as a .png, to make loading time on the .html not too long
+ggplot2::ggsave('./outputs/cfr_plots/cfr_plot_grid.png',
        cfr_plot_grid,
        width = 8, 
        height = 10, 

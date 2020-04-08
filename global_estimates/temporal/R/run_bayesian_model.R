@@ -6,17 +6,15 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   data <- data %>%
     filter(cases_known > 0)
   
-  library(greta.gp)
-  
   n <- nrow(data)
   times <- seq(min(data$date_num), max(data$date_num))
   
   # GP parameters for squared-exponential kernel plus a bias term (intercept)
   # for reporting rate
-  lengthscale <- lognormal(4, 0.5)
-  sigma <- lognormal(-1, 1)
-  temporal <- rbf(lengthscales = lengthscale,
-                       variance = sigma ^ 2)
+  lengthscale <- greta::lognormal(4, 0.5)
+  sigma <- greta::lognormal(-1, 1)
+  temporal <- greta.gp::rbf(lengthscales = lengthscale,
+                            variance = sigma ^ 2)
   intercept <- bias(1)
   reporting_kernel <- temporal + intercept
   
@@ -36,14 +34,14 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   z <- greta.gp::gp(times, inducing = inducing_points, kernel)
   
   # convert to probabilities
-  reporting_rate <- iprobit(z)
+  reporting_rate <- greta::iprobit(z)
   
   # distribution over plausible baseline CFR values from China study. The 95%
   # CIs are symmetric around the estimate, so we assume it's an approximately
   # Gaussian distribution, truncated to allowable values.
   true_cfr_mean <- CFRBaseline
   true_cfr_sigma <- mean(abs(CFREstimateRange - CFRBaseline)) / 1.96
-  baseline_cfr_perc <- normal(true_cfr_mean, true_cfr_sigma, truncation = c(0, 100))
+  baseline_cfr_perc <- greta::normal(true_cfr_mean, true_cfr_sigma, truncation = c(0, 100))
   
   # compute the expected number of deaths at each timepoint, given the true CFR,
   # number of reported cases with known outcomes, and reporting rate
@@ -52,10 +50,10 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   expected_deaths <- exp(log_expected_deaths)
   
   # define sampling distribution
-  distribution(data$deaths) <- poisson(expected_deaths)
+  greta::distribution(data$deaths) <- greta::poisson(expected_deaths)
   
   # construct the model
-  m <- model(reporting_rate)
+  m <- greta::model(reporting_rate)
   
   n_chains <- 50
   
@@ -79,7 +77,7 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   }
   
   # draw a bunch of mcmc samples
-  draws <- mcmc(
+  draws <- greta::mcmc(
     m,
     sampler = hmc(Lmin = 15, Lmax = 20),
     chains = n_chains,
@@ -100,15 +98,15 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
         message("maximum R-hat: ", max(r_hats),
                 "\nminimum n-eff: ", min(n_eff))
       }
-      draws <- extra_samples(draws, 2000, one_by_one = TRUE, verbose = verbose)
+      draws <- greta::extra_samples(draws, 2000, one_by_one = TRUE, verbose = verbose)
     }
   }
   
   # predict without IID noise (true reporting rate, without clumped death reporting)
   # could predict to more granular times here too
   z_smooth <- greta.gp::project(z, times, kernel = reporting_kernel)
-  reporting_rate_smooth <- iprobit(z_smooth)
-  draws_pred <- calculate(reporting_rate_smooth, values = draws)
+  reporting_rate_smooth <- greta::iprobit(z_smooth)
+  draws_pred <- greta::calculate(reporting_rate_smooth, values = draws)
   
   # get estimates
   draws_pred_mat <- as.matrix(draws_pred)
