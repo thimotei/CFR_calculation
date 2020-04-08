@@ -92,7 +92,7 @@ dataTable <- allTogetherClean %>% dplyr::select(country, underreporting_estimate
   plot
 ```
 
-*Figure 2: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Blue shading is the 2.5% - 97.5% confidence range. Note that there is a mean delay of 13 days between confirmation and death, and so these estimates reflect the percentage of cases being reported as of around two weeks ago.*
+*Figure 2: Plotting the estimates for the proportion of symptomatic cases reported in different countries using cCFR estimates. Blue shading is the 2.5% - 97.5% confidence range.*
 
 ### Table of current estimates
 

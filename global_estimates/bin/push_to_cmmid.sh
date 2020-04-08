@@ -1,56 +1,42 @@
-!/bin/bash
+#!/bin/bash
 
 
 # Get or update CMMID
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+#DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-echo "$DIR"
+DIRCMMID='/home/tim/Documents/lshtm/github repos/cmmid.github.io'
+DIRCFR="/home/tim/Documents/lshtm/github repos/CFR_calculation/global_estimates"
 
-cd ../..
 
-base_url="https://github.com/cmmid/"
-project="cmmid.github.io"
-
-cd $project
+cd "$DIRCMMID"
 
 git pull
 
-# Update git or clone if not present
-#if ([ -e $project ]); then
-#printf "\tUpdating project: %s \n" $project
-#cd $project
-#git pull
-#cd ..
-#else
-  #printf "\tCloning project: %s into projects: %s\n" $project $1
-#git clone "$base_url$project.git"
-#fi
+## Add new report to Repo
 
-# Add new report to Repo
+cd "$DIRCFR"
 
-cd ~/Documents/lshtm/github\ repos/CFR_calculation/
+Rscript scripts/main_script.R
 
-Rscript global_estimates/scripts/main_script_clean.R
+Rscript scripts/main_script_temporal.R
 
-Rscript global_estimates/scripts/main_script_temporal.R
-
-R -e "rmarkdown::render('global_estimates/Rmd/global_cfr_estimates_public.rmd', run_pandoc = FALSE)"
+R -e "rmarkdown::render('Rmd/global_cfr_estimates_public.rmd', 'html_document', run_pandoc = FALSE)"
 
 Rscript -e "EpiNow::copy_report(
-               yaml = 'global_estimates/man/report-yaml.md',
-               report = 'global_estimates/Rmd/global_cfr_estimates_public.html',
+               yaml = 'man/report-yaml.md',
+               report = 'Rmd/global_cfr_estimates_public.html',
                date = Sys.Date(),
                lines_to_cut = 1:7,
-               report_target = 'cmmid.github.io/topics/covid19/severity/_posts/2020-03-22-global_cfr_estimates.html')"
+               report_target = '../../cmmid.github.io/topics/covid19/severity/_posts/2020-03-22-global_cfr_estimates.html')"
 
 
-# Update Repo
+## Update Repo
 
-cd ../$project
+cd "$DIRCMMID"
 
 git add --all
 git commit -m "Update global_cfr_estimates"
 git push
 
-cd ../$source
+cd "$DIRCFR"
