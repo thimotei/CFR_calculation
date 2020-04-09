@@ -29,7 +29,7 @@ hospitalisation_to_death_truncated <- function(x) {
 
 # Load data -----------------------------------------------------
 httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
-allDat <- read_csv(tf)
+allDat <- readr::read_csv(tf)
 
 # munging data into correct format and selecting countries with greater than 10 deaths
 allTogetherClean <- allDat %>% 
@@ -50,15 +50,15 @@ allTogetherClean <- allDat %>%
 
 # Plot rough reporting over time -----------------------------------------
 plot_country_names <- allTogetherClean %>% 
-  mutate(death_cum_sum = cumsum(new_deaths)) %>% 
-  filter(death_cum_sum >= 10) %>%
-  mutate(max_deaths = max(death_cum_sum)) %>% 
-  group_by(country) %>%
-  summarise(max_deaths = first(max_deaths),
-            observations = n()) %>%
-  filter(observations >= 10) %>%
-  arrange(-max_deaths) %>% 
-  pull(country) %>%
+  dplyr::mutate(death_cum_sum = cumsum(new_deaths)) %>% 
+  dplyr::filter(death_cum_sum >= 10) %>%
+  dplyr::mutate(max_deaths = max(death_cum_sum)) %>% 
+  dplyr::group_by(country) %>%
+  dplyr::summarise(max_deaths = dplyr::first(max_deaths),
+            observations = dplyr::n()) %>%
+  dplyr::filter(observations >= 10) %>%
+  dplyr::arrange(-max_deaths) %>% 
+  dplyr::pull(country) %>%
   unique()
 
 

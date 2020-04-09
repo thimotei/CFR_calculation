@@ -31,7 +31,7 @@ git pull
 
 cd ~/Documents/lshtm/github\ repos/CFR_calculation/
 
-Rscript global_estimates/scripts/main_script_clean.R
+Rscript global_estimates/scripts/main_script.R
 
 R -e "rmarkdown::render('global_estimates/Rmd/global_cfr_estimates_public.rmd', run_pandoc = FALSE)"
 

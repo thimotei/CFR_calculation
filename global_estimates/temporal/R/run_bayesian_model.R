@@ -4,7 +4,7 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   
   # only fit to time points where there are known cases
   data <- data %>%
-    filter(cases_known > 0)
+    dplyr::filter(cases_known > 0)
   
   n <- nrow(data)
   times <- seq(min(data$date_num), max(data$date_num))
@@ -15,12 +15,12 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   sigma <- greta::lognormal(-1, 1)
   temporal <- greta.gp::rbf(lengthscales = lengthscale,
                             variance = sigma ^ 2)
-  intercept <- bias(1)
+  intercept <- greta.gp::bias(1)
   reporting_kernel <- temporal + intercept
   
   # IID noise kernel for observation overdispersion (clumped death reports)
-  sigma_obs <- normal(0, 0.5, truncation = c(0, Inf))
-  observation_kernel <- white(sigma_obs ^ 2)
+  sigma_obs <-greta::normal(0, 0.5, truncation = c(0, Inf))
+  observation_kernel <- greta.gp::white(sigma_obs ^ 2)
   
   # combined kernel (marginalises a bunch of parameters for easier sampling)
   kernel <- reporting_kernel + observation_kernel
@@ -60,7 +60,7 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   # sample initial values for hyperparameters from within their priors
   inits <- replicate(
     n_chains,
-    initials(
+    greta::initials(
       lengthscale = rlnorm(1, 4, 0.5),
       sigma = abs(rnorm(1, 0, 0.5)),
       sigma_obs = abs(rnorm(1, 0, 0.5)),
@@ -79,7 +79,7 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   # draw a bunch of mcmc samples
   draws <- greta::mcmc(
     m,
-    sampler = hmc(Lmin = 15, Lmax = 20),
+    sampler = greta::hmc(Lmin = 15, Lmax = 20),
     chains = n_chains,
     warmup = 1000,
     n_samples = 1000,
