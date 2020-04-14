@@ -2,9 +2,9 @@
 # Author: Tim Russell
 
 # Source functions 
-source("R/scale_CFR.R")
-source("R/delay_distributions.R")
-source("R/table_of_estimates.R")
+source("CFR_calculation/global_estimates/R/scale_CFR.R")
+source("CFR_calculation/global_estimates/R/delay_distributions.R")
+source("CFR_calculation/global_estimates/R/table_of_estimates.R")
 
 # Set paths
 here::here()
@@ -88,4 +88,4 @@ reportDataFinal <- finalRes %>%
                                                 "% (",lower*100,"% - ",upper*100,"%)"))
 
 # saving the output
-saveRDS(reportDataFinal, "data/reportDataFinal.rds")
+saveRDS(reportDataFinal, "CFR_calculation/global_estimates/data/reportDataFinal.rds")
