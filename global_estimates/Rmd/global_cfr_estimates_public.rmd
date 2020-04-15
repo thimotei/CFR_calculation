@@ -50,7 +50,7 @@ To estimate the percentage of symptomatic COVID-19 cases reported in different c
 
 ### Temporal variation
 
-```{r fig_Main, echo=FALSE, fig.align='center', fig.cap="_Figure 1: Temporal variation in reporting rate. We calculate the percentage of symptomatic cases reported on each day a country has had more than ten deaths. We then fit a Generalised Additive Model to these data (see Temporal variation model fitting section for details), highlighting the temporal trend of each countries reporting rate. The red shaded region is the 95% CI of fitted GAM._", out.width = '100%'}
+```{r fig_Main, echo=FALSE, fig.align='center', fig.cap="_Figure 1: Temporal variation in reporting rate. We calculate the percentage of symptomatic cases reported on each day a country has had more than ten deaths. We then fit a Generalised Additive Model to these data (see Temporal variation model fitting section for details), highlighting the temporal trend of each countries reporting rate. The shaded region is the 95% CI of fitted GAM._", out.width = '100%'}
 knitr::include_graphics("../outputs/figure_1.png")
 ```
 

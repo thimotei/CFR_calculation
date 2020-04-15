@@ -1,7 +1,7 @@
 # Code to fit GAMs to time-series of under-reporting estimates
 
 # Set paths
-setwd(here::here())
+here::here() %>% setwd()
 
 #source data processing and plotting scripts
 source("CFR_calculation/global_estimates/temporal/R/cfr_plot_theme.R")
@@ -31,7 +31,7 @@ hospitalisation_to_death_truncated <- function(x) {
 
 # Load data -----------------------------------------------------
 httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
-allDat <- read_csv(tf)
+allDat <- readr::read_csv(tf)
 
 
 allTogether <- allDat %>% 
@@ -58,7 +58,7 @@ plot_country_names <- allTogether %>%
   dplyr::mutate(max_deaths = max(death_cum_sum)) %>% 
   dplyr::arrange(-max_deaths) %>% 
   dplyr::group_by(country) %>% 
-  dplyr::filter(n() >= 8) %>%
+  dplyr::filter(dplyr::n() >= 8) %>%
   dplyr::pull(country) %>% 
   unique()
 

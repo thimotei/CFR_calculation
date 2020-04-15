@@ -6,7 +6,7 @@ get_plot_data <- function(country_name, data = allTogether){
   #filter country data and adjust date
   country_data <- data %>% 
     dplyr::filter(country == country_name) %>% 
-    dplyr::mutate(date = date - zmeanHDT)
+    dplyr::mutate(date = date - zMean)
   
   #date where cumulative deaths passed 10
   death_threshold_date <- country_data %>% 

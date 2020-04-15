@@ -1,13 +1,13 @@
 # Code to calculate estimates for under-reporting as of today
 # Author: Tim Russell
 
+# Set paths
+here::here() %>% setwd()
+
 # Source functions 
 source("CFR_calculation/global_estimates/R/scale_CFR.R")
 source("CFR_calculation/global_estimates/R/delay_distributions.R")
 source("CFR_calculation/global_estimates/R/table_of_estimates.R")
-
-# Set paths
-here::here()
 
 # setting the baseline CFR
 cCFRBaseline <- 1.4
@@ -37,7 +37,7 @@ sigmaHigh <- sigmaTransform(zmeanHigh, muHigh)
 # Load data -----------------------------------------------------
 
 httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", httr::authenticate(":", ":", type="ntlm"), httr::write_disk(tf <- tempfile(fileext = ".csv")))
-allDat <- read.csv(tf)
+allDat <- readr::read_csv(tf)
 
 
 # munge data, pad data and select only those with greater than 10 deaths
