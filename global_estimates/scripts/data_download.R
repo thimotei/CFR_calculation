@@ -1,5 +1,10 @@
 suppressPackageStartupMessages({
   require(httr)
+  require(readr)
+  require(dplyr)
+  require(tidyr)
+  require(lubridate)
+  require(padr)
 })
 
 .args <- if (interactive()) c(
@@ -12,37 +17,36 @@ rawthing <- GET(
 )$content
 
 # TODO: not so fast...need to filter as well
-allDat <- readr::read_csv(rawthing)
+allDat <- read_csv(rawthing)
 
 # filter, etc
 # munging data into correct format and selecting countries with greater than 10 deaths
 allTogetherClean <- allDat %>% 
-  dplyr::arrange(countriesAndTerritories, dateRep) %>% 
-  dplyr::mutate(dateRep = lubridate::dmy(dateRep))%>% 
-  dplyr::rename(date = dateRep, new_cases = cases, new_deaths = deaths, country = countriesAndTerritories) %>%
-  dplyr::select(date, country, new_cases, new_deaths) %>%
-  dplyr::filter(!country %in% c("CANADA", "Cases_on_an_international_conveyance_Japan")) %>%
-  dplyr::group_by(country) %>%
-  padr::pad() %>%
-  dplyr::mutate(new_cases = tidyr::replace_na(new_cases, 0),
-                new_deaths = tidyr::replace_na(new_deaths, 0)) %>%
-  dplyr::group_by(country) %>%
-  dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
-  dplyr::filter(cum_deaths > 0) %>%
-  dplyr::select(-cum_deaths)
-
+  arrange(countriesAndTerritories, dateRep) %>% 
+  mutate(dateRep = dmy(dateRep))%>% 
+  rename(date = dateRep, new_cases = cases, new_deaths = deaths, country = countriesAndTerritories, country_code = countryterritoryCode) %>%
+  select(date, country, country_code, new_cases, new_deaths) %>%
+  filter(!country %in% c("CANADA", "Cases_on_an_international_conveyance_Japan")) %>%
+  group_by(country) %>%
+  pad() %>%
+  mutate(new_cases = replace_na(new_cases, 0),
+         new_deaths = replace_na(new_deaths, 0)) %>%
+  group_by(country) %>%
+  mutate(cum_deaths = sum(new_deaths)) %>%
+  filter(cum_deaths > 0) %>%
+  select(-cum_deaths)
 
 # Plot rough reporting over time -----------------------------------------
 plot_country_names <- allTogetherClean %>% 
-  dplyr::mutate(death_cum_sum = cumsum(new_deaths)) %>% 
-  dplyr::filter(death_cum_sum >= 10) %>%
-  dplyr::mutate(max_deaths = max(death_cum_sum)) %>% 
-  dplyr::group_by(country) %>%
-  dplyr::summarise(max_deaths = dplyr::first(max_deaths),
-            observations = dplyr::n()) %>%
-  dplyr::filter(observations >= 10) %>%
-  dplyr::arrange(-max_deaths) %>% 
-  dplyr::pull(country) %>%
+  mutate(death_cum_sum = cumsum(new_deaths)) %>% 
+  filter(death_cum_sum >= 10) %>%
+  mutate(max_deaths = max(death_cum_sum)) %>% 
+  group_by(country) %>%
+  summarise(max_deaths = first(max_deaths),
+     observations = n()) %>%
+  filter(observations >= 10) %>%
+  arrange(-max_deaths) %>% 
+  pull(country) %>%
   unique()
 
-write_csv(allTogetherClean %>% filter(country %in% plot_country_names), file = tail(.args,1))
+write_csv(allTogetherClean %>% filter(country %in% plot_country_names), path = tail(.args,1))

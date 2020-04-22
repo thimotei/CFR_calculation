@@ -1,5 +1,5 @@
 #get time varying cfr data for a country
-get_plot_data <- function(country_name, data = allTogetherClean, CFRBaseline){
+get_plot_data <- function(country_name, data = allTogetherClean ,CFRBaseline){
 
   #filter country data and adjust date
   country_data <- data %>% 
