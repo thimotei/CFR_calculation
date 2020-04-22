@@ -2,7 +2,7 @@
 
 PATHTOSRC := CFR_calculation/global_estimates/temporal/R
 
-SRCS := get_plot_data plot_country run_bayesian_model cfr_plot_theme scale_cfr_temporal
+SRCS := $(shell ls ${PATHTOSRC})
 
 SRCFILES := $(patsubst %,${PATHTOSRC}/%.R,${SRCS})
 
