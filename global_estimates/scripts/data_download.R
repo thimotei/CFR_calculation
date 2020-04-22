@@ -6,12 +6,13 @@ suppressPackageStartupMessages({
   "somedata.csv"
 ) else commandArgs(trailingOnly = TRUE)
 
-# TODO: not so fast...need to filter as well
-GET(
+rawthing <- GET(
   "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv",
-  authenticate(":", ":", type="ntlm"),
-  write_disk(tail(.args,1))
-)
+  authenticate(":", ":", type="ntlm")
+)$content
+
+# TODO: not so fast...need to filter as well
+allDat <- readr::read_csv(rawthing)
 
 # filter, etc
 # munging data into correct format and selecting countries with greater than 10 deaths
@@ -44,3 +45,4 @@ plot_country_names <- allTogetherClean %>%
   dplyr::pull(country) %>%
   unique()
 
+write_csv(allTogetherClean %>% filter(country %in% plot_country_names), file = tail(.args,1))
