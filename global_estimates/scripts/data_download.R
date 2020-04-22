@@ -1,11 +1,13 @@
 suppressPackageStartupMessages({
-  require(tidyverse)
+  require(httr)
 })
 
 .args <- if (interactive()) c(
   "somedata.csv"
 ) else commandArgs(trailingOnly = TRUE)
 
-res <- tibble()
-
-write_csv(res, file = tail(.args,1))
+GET(
+  "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv",
+  authenticate(":", ":", type="ntlm"),
+  write_disk(tail(.args,1))
+)
