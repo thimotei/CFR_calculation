@@ -6,6 +6,8 @@ SRCS := $(shell ls ${PATHTOSRC})
 
 SRCFILES := $(patsubst %,${PATHTOSRC}/%.R,${SRCS})
 
+default: testrun
+
 R = Rscript $^ $@
 
 something.csv: data_download.R
@@ -14,8 +16,10 @@ something.csv: data_download.R
 alltargets.slurm: something.csv
   echo "TODO generate appropriate slurm tasking"
 
-result_%.csv: run_inference.R something.csv ${SRCFILES}
+result_%.rds: run_simulation.R something.csv ${SRCFILES}
   Rscript $^ $* $@
+
+testrun: result_AFG.rds
 
 gather.tar.gz: $(wildcard result_*.csv)
   echo "TODO gather the pieces"
