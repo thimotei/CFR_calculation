@@ -4,7 +4,7 @@ title: "Using a delay-adjusted case fatality ratio to estimate under-reporting"
 description: "Using a corrected case fatality ratio, we calculate estimates of
 the level of under-reporting for any country with greater than ten deaths"
 
-status: in-progress
+status: real-time-report
 
 rmarkdown_html_fragment: true
 
@@ -26,5 +26,10 @@ authors:
   - id: roz_eggo
   - id: john_edmunds
   - id: adam_kucharski
+
+redirect_from:
+- /topics/covid19/severity/2020-03-22-global_cfr_estimates.html
+
+tags: [severity]
 
 ---

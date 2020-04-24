@@ -28,7 +28,7 @@ Rscript -e "EpiNow::copy_report(
                report = '~/Documents/lshtm/github\ repos/CFR_calculation/global_estimates/Rmd/global_cfr_estimates_public.html',
                date = Sys.Date(),
                lines_to_cut = 1:7,
-               report_target = '~/Documents/lshtm/github\ repos/cmmid.github.io/topics/covid19/severity/_posts/2020-03-22-global_cfr_estimates.html')"
+               report_target = '~/Documents/lshtm/github\ repos/cmmid.github.io/topics/covid19/_posts/2020-03-22-global_cfr_estimates.html')"
 
 ## Update Repo
 

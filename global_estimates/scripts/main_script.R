@@ -79,6 +79,7 @@ reportDataFinal <- finalRes %>%
                 upper) %>%
   dplyr::mutate(underreporting_estimate = ifelse(underreporting_estimate <= 1, underreporting_estimate, 1)) %>%
   dplyr::mutate(upper = ifelse(upper <= 1, upper, 1)) %>%
+  dplyr::mutate(lower = ifelse(lower <= 1, lower, 1)) %>%
   dplyr::mutate(underreporting_estimate = signif(underreporting_estimate, 2)) %>%
   dplyr::mutate(lower = signif(lower, 2)) %>%
   dplyr::mutate(upper = signif(upper, 2)) %>%
