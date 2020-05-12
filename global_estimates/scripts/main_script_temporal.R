@@ -48,8 +48,9 @@ allTogether <- allDat %>%
   dplyr::group_by(country) %>%
   dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
   dplyr::filter(cum_deaths > 0) %>%
-  dplyr::select(-cum_deaths)
-
+  dplyr::select(-cum_deaths) %>% 
+  dplyr::mutate(new_deaths = dplyr::if_else(date >= "2020-01-23" & date < "2020-04-17" & country == "China", new_deaths + 15,
+                             dplyr::if_else(date == "2020-04-17" & country == "China", 15, new_deaths)))
 
 # Plot rough reporting over time -----------------------------------------
 plot_country_names <- allTogether %>% 
@@ -62,7 +63,6 @@ plot_country_names <- allTogether %>%
   dplyr::pull(country) %>% 
   unique()
 
-plot_data <- get_plot_data(country_name = "Spain")
 
 cfr_plots <- list()
 for (country_name in plot_country_names){
@@ -85,7 +85,7 @@ cfr_plot_grid = gridExtra::arrangeGrob(grobs = cfr_plots,
 ggplot2::ggsave('CFR_calculation/global_estimates/outputs/figure_1.png',
        cfr_plot_grid,
        width =11, 
-       height = 25, 
+       height = 35, 
        units = 'in', 
        dpi = 450)
 

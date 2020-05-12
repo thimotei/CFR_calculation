@@ -55,7 +55,9 @@ allTogetherClean <- allDat %>%
   dplyr::group_by(country) %>%
   dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
   dplyr::filter(cum_deaths > 0) %>%
-  dplyr::select(-cum_deaths)
+  dplyr::select(-cum_deaths) %>% 
+  dplyr::mutate(new_deaths = dplyr::if_else(date >= "2020-01-23" & date < "2020-04-17" & country == "China", new_deaths + 15,
+                                            dplyr::if_else(date == "2020-04-17" & country == "China", 15, new_deaths)))
 
 # calculate table of estimates using three delay distributions (both ends of the reported ranges and the mean)
 allTogetherLow <- underReportingEstimates(allTogetherClean, hospitalisation_to_death_truncated_low) 

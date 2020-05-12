@@ -19,7 +19,7 @@ get_plot_data <- function(country_name, data = allTogether){
   cfr <- scale_cfr_temporal(country_data) %>% 
     dplyr::as_tibble() %>% 
     dplyr::mutate(reporting_estimate = true_cfr/cCFR) %>% 
-    dplyr:: mutate(reporting_estimate = pmin(reporting_estimate, 1),
+    dplyr::mutate(reporting_estimate = pmin(reporting_estimate, 1),
            country = country_data$country,
            date = country_data$date,
            date_num = as.numeric(country_data$date),
