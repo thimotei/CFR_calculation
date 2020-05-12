@@ -113,6 +113,7 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   
   # compute posterior mean and 95% credible interval and return
   tibble::tibble(
+    date = data$date,
     estimate = colMeans(draws_pred_mat),
     lower = apply(draws_pred_mat, 2, quantile, 0.025),
     upper = apply(draws_pred_mat, 2, quantile, 0.975)
