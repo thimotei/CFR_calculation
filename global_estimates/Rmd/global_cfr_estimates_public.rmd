@@ -11,7 +11,6 @@ library(dplyr)
 library(ggplot2)
 library(cowplot)
 library(patchwork)
-
 ```
 
 ```{r setup, include=FALSE}
@@ -23,7 +22,7 @@ knitr::opts_chunk$set(echo = FALSE)
 target_date <- Sys.Date()
 ```
 
-*Timothy W Russell<sup>&ast;</sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Nick Holding, Hamish Gibbs, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
+*Timothy W Russell<sup>&ast;</sup>, Joel Hellewell<sup>†</sup>, Sam Abbott<sup>†</sup>, Nick Golding, Hamish Gibbs, Christopher I Jarvis<sup></sup>, Kevin Van Zandvoort<sup></sup>, CMMID COVID-19 working group, Stefan Flasche<sup></sup>, Rosalind M Eggo<sup></sup>, W John Edmunds<sup></sup>, Adam J Kucharski<sup></sup>*
 
 <sup> † </sup> authors contributed equally
 
@@ -73,7 +72,7 @@ caseSummaryData <- allDatRaw %>%
   dplyr::summarise(totalCases = sum(cases))
 
 
-data_path <- "~/Dropbox/bayesian_underreporting_estimates/current_estimates/"
+data_path <- "~/Dropbox/bayesian_underreporting_estimates/current_estimates_extracted/"
 files <- dir(path = data_path,
              pattern = "*.rds")
 
@@ -96,10 +95,10 @@ dataTmp <- dplyr::tibble(countryCode = files) %>%
 underReportingData <- dataTmp %>% 
   dplyr::left_join(deathSummaryData, by = c('country' = 'country')) %>% 
   dplyr::left_join(caseSummaryData, by = c('country' = 'country')) %>% 
-  dplyr::arrange(desc(country_order), date) %>%
-  dplyr::mutate(country = stringr::str_replace_all(country, "_", " "))
+  dplyr::arrange(desc(country_order), date) 
 
 dataPlotTemporal <- underReportingData %>% 
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
   dplyr::group_by(country) %>%
   dplyr::filter(dplyr::n() > 20) %>%
   dplyr::ungroup() %>%
@@ -107,20 +106,27 @@ dataPlotTemporal <- underReportingData %>%
   dplyr::mutate(estimate = estimate*100,
                 lower = lower*100,
                 upper = upper*100) %>%
-  dplyr::filter(!(country == "China" & date > "2020-02-02")) %>%
+  dplyr::filter(!(country == "China" & date > "2020-03-15")) %>%
   dplyr::arrange(country)
 
 dataTrueCases <- allDatRaw %>%
+  dplyr::mutate(date = as.Date(date)) %>%
   dplyr::left_join(underReportingData) %>%
   dplyr::select(date, country, cases, deaths, estimate, lower, upper) %>%
   dplyr::group_by(country) %>%
   dplyr::arrange(date, .by_group = TRUE) %>%
   tidyr::drop_na() %>%
-  dplyr::mutate(trueCasesMid = cases/estimate,
-                trueCasesLow = cases/upper,
-                trueCasesHigh = cases/lower)
+  dplyr::mutate(trueCasesMid = smooth::sma(cases/estimate)$fitted,
+                trueCasesLow = smooth::sma(cases/upper)$fitted,
+                trueCasesHigh =smooth::sma(cases/lower)$fitted) %>%
+  dplyr::ungroup(country) %>%
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
+  dplyr::filter(!(country == "China" & date > "2020-03-15")) %>%
+  dplyr::filter(!(country == "Paraguay")) %>%
+  dplyr::filter(dplyr::n() > 20) 
 
 dataPlot <- underReportingData %>% 
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
   dplyr::filter(date == max(date)) %>% 
     dplyr::mutate(
       country = country  %>%
@@ -131,6 +137,7 @@ dataPlot <- underReportingData %>%
 
 
 dataTable <- underReportingData %>%
+  dplyr::mutate(country = stringr::str_replace_all(country, "_", " ")) %>%
   dplyr::filter(date == max(date)) %>% 
   dplyr::mutate(estimate = estimate*100,
                 lower = lower*100,
@@ -147,7 +154,7 @@ dataTable <- underReportingData %>%
 plotTemporal <- dataPlotTemporal %>%
   ggplot2::ggplot(ggplot2::aes(x = date)) +
   #ggplot2::geom_line(ggplot2::aes(y = estimate)) + 
-  ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper), fill = "dodgerblue", alpha = 0.3) + 
+  ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper), fill = "dodgerblue", alpha = 0.4) + 
   ggplot2::facet_wrap(~country, scales = "free", ncol = 4) + 
   #cowplot::theme_cowplot(font_size = 11) +
   ggplot2::xlab("") + 
@@ -157,14 +164,14 @@ plotTemporal
 
 *Figure 1: Temporal variation in reporting rate. We calculate the percentage of symptomatic cases reported on each day a country has had more than ten deaths. We then fit a Gaussian Process (GP) to these data (see Temporal variation model fitting section for details), highlighting the temporal trend of each countries reporting rate. The red shaded region is the 95% CrI of fitted GP.*
 
-### True symptomatic case estimates
+### Adjusted symptomatic case estimates
 
 ```{r include = TRUE, fig.width = 10, fig.height = 40}
 trueCasePlot <- dataTrueCases %>%
   dplyr::group_by(country) %>%
   ggplot2::ggplot(ggplot2::aes(x = date)) +
-  ggplot2::geom_line(ggplot2::aes(y = trueCasesMid)) + 
-  ggplot2::geom_ribbon(ggplot2::aes(ymin = trueCasesLow, ymax = trueCasesHigh), fill = "dodgerblue", alpha = 0.2) + 
+  #ggplot2::geom_line(ggplot2::aes(y = trueCasesMid)) + 
+  ggplot2::geom_ribbon(ggplot2::aes(ymin = trueCasesLow, ymax = trueCasesHigh), fill = "dodgerblue", alpha = 0.4) + 
   ggplot2::facet_wrap(~country, scales = "free", ncol = 4) + 
   #cowplot::theme_cowplot(font_size = 11) +
   ggplot2::xlab("") + 
@@ -235,6 +242,11 @@ The kernel is split into two components: the reporting kernel $R$, and the obser
 
 In the sampling and fitting process, we calculate the expected number of deaths at each time-point, given the baseline CFR. We then use a Poisson likelihood, where the expected number of deaths is the rate of the Poisson likelihood, given the observed number of deaths 
 
+
+## Adjusting case counts for under-reporting
+
+We adjust the reported number of cases each day, pulled from the [ECDC](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide). Specifically, we divide the case numbers of each day by our "proportion of cases reported" estimates that we calculate each day for each country.*
+
 ## Limitations
 
 Implicit in assuming that the under-reporting is $\frac{1.4\%}{\text{cCFR}}$ for a given country is that the deviation away from the assumed 1.4% CFR is entirely down to under-reporting. In reality, burden on healthcare system is a likely contributing factor to higher than 1.4% CFR estimates, along with many other country specific factors.
@@ -265,20 +277,4 @@ The authors, on behalf of the Centre for the Mathematical Modelling of Infectiou
 
 <div id = 'refs'></div>
 
-<!---
-1 Kucharski AJ, Edmunds WJ. Case fatality rate for ebola virus disease in west africa. The Lancet 2014;384:1260.
 
-2 Nishiura H, Klinkenberg D, Roberts M et al. Early epidemiological assessment of the virulence of emerging infectious diseases: A case study of an influenza pandemic. PLoS One 2009;4.
-
-3 Linton NM, Kobayashi T, Yang Y et al. Incubation period and other epidemiological characteristics of 2019 novel coronavirus infections with right truncation: A statistical analysis of publicly available case data. Journal of Clinical Medicine 2020;9:538.
-
-4 Wu Z, McGoogan JM. Characteristics of and important lessons from the coronavirus disease 2019 (covid-19) outbreak in china: Summary of a report of 72 314 cases from the chinese center for disease control and prevention. JAMA 2020.
-
-5 Russell TW,  Hellewell J, Jarvis CI, van-Zandvoort K, Abbott S, Ratnayake R, Flasche S, Eggo RM, Kucharski AJ, CMMID nCov working group. Estimating the infection and case fatality ratio for COVID-19 using age-adjusted data from the outbreak on the Diamond Princess cruise ship. medRxiv 2020.
-
-6 Verity R, Okell LC, Dorigatti I, Winskill P, Whittaker C, Imai N, Cuomo-Dannenburg G, Thompson H, Walker P, Fu H, et al. Estimates of the severity of COVID-19 disease. medRxiv (2020)
-
-7 Guan W, Ni Z, Hu Y, Liang W, Ou C, He J, Liu L, Shan H, Lei C, Hui D SC et al. linical characteristics of coronavirus disease 2019 in China. New England Journal of Medicine (2020).
-
-8 Abbott S, Hellewell J, Munday JD et al. NCoVUtils: Utility functions for the 2019-ncov outbreak. - 2020;-:–. doi:10.5281/zenodo.3635417
---->

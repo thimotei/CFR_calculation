@@ -34,7 +34,12 @@ allTogetherClean <- allDat %>%
   group_by(country) %>%
   mutate(cum_deaths = sum(new_deaths)) %>%
   filter(cum_deaths > 0) %>%
-  select(-cum_deaths)
+  select(-cum_deaths) %>%
+  mutate(new_cases = case_when(new_cases < 0 ~ 0,
+                               new_cases >= 0 ~ new_cases),
+         new_deaths = case_when(new_deaths < 0 ~ 0,
+                                new_deaths >= 0 ~ new_deaths)
+         )
 
 # Plot rough reporting over time -----------------------------------------
 plot_country_names <- allTogetherClean %>% 
