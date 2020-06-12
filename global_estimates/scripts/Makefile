@@ -13,7 +13,7 @@ R = Rscript $^ $@
 something.csv: data_download.R
 	${R}
 	
-adjusted_cfr.csv: adjusted_cfr.R
+adjusted_cfr.csv: adjusted_cfr.R age_stratified_cfr.csv
 	${R}
 
 alltargets.slurm: something.csv
