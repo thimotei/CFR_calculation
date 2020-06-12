@@ -16,7 +16,7 @@ something.csv: data_download.R
 alltargets.slurm: something.csv
 	echo "TODO generate appropriate slurm tasking"
 
-result_%.rds: run_simulation.R something.csv ${SRCFILES}
+result_%.rds: run_simulation.R adjusted_cfr.csv something.csv ${SRCFILES}
 	Rscript $^ $* $@
 
 testrun: result_AFG.rds
