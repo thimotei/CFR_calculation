@@ -12,6 +12,9 @@ R = Rscript $^ $@
 
 something.csv: data_download.R
 	${R}
+	
+adjusted_cfr.csv: adjusted_cfr.R
+	${R}
 
 alltargets.slurm: something.csv
 	echo "TODO generate appropriate slurm tasking"
