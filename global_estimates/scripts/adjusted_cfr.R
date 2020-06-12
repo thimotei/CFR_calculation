@@ -6,13 +6,18 @@ suppressPackageStartupMessages({
   require(wpp2019)
 })
 
+.args <- if (interactive()) c(
+  "age_stratified_cfr.csv", "adjusted_cfr.csv"
+) else commandArgs(trailingOnly = TRUE)
+  
+age_stratified_cfr <- read_csv(.args[1])
+
 data(popM)
 data(popF)
 
 male_age_strat_age_data <- popM %>% 
   select(country_code, age, "2020") %>%
-  mutate(iso3c = countrycode(country_code, "iso3n", destination = 'iso3c'),
-         country_name = countrycode(country_code, "iso3n", destination = 'iso.name.en')) %>%
+  mutate(iso3c = countrycode(country_code, "iso3n", destination = 'iso3c')) %>%
   drop_na() %>%
   mutate(age = dplyr::case_when(age == "0-4" ~ "0-9",
                                        age == "5-9" ~ "0-9",
@@ -36,15 +41,14 @@ male_age_strat_age_data <- popM %>%
                                        age == "95-99" ~ "80+",
                                        age == "100+" ~ "80+")) %>%
   rename(population = "2020") %>%
-  group_by(country_name, age) %>%
+  group_by(iso3c, age) %>%
   arrange(age) %>%
   summarise(population_male = sum(population))
 
 
 female_age_strat_age_data <- popF %>% 
   select(country_code, age, "2020") %>%
-  mutate(iso3c = countrycode(country_code, "iso3n", destination = 'iso3c'),
-         country_name = countrycode(country_code, "iso3n", destination = 'iso.name.en')) %>%
+  mutate(iso3c = countrycode(country_code, "iso3n", destination = 'iso3c')) %>%
   mutate(age = case_when(age == "0-4" ~ "0-9",
                                        age == "5-9" ~ "0-9",
                                        age == "10-14" ~ "10-19",
@@ -68,25 +72,21 @@ female_age_strat_age_data <- popF %>%
                                        age == "100+" ~ "80+")) %>%
   drop_na() %>%
   rename(population = "2020") %>%
-  group_by(country_name, age) %>%
+  group_by(iso3c, age) %>%
   arrange(age) %>%
   summarise(population_female = sum(population)) 
 
 
 age_strat_age_data <- male_age_strat_age_data %>%
-  left_join(female_age_strat_age_data, by = c("country_name", "age")) %>% 
+  left_join(female_age_strat_age_data, by = c("iso3c", "age")) %>% 
   mutate(population_male = population_male*1000,
          population_female = population_female*1000,
          population = population_male + population_female)
 
-
-age_stratified_cfr <- read_csv("covid_underreporting/data/age_stratified_cfr.csv")
-
-
 age_adjusted_cfr <- age_strat_age_data %>%
-  group_by(country_name) %>%
-  summarise(weighted_cfr_mid = weighted.mean(age_stratified_cfr$cfr_mid, population)*100,
-            weighted_cfr_low = weighted.mean(age_stratified_cfr$cfr_low, population)*100,
-            weighted_cfr_high = weighted.mean(age_stratified_cfr$cfr_high, population)*100)
+  group_by(iso3c) %>%
+  summarise(cfr_mid  = weighted.mean(age_stratified_cfr$cfr_mid, population)*100,
+            cfr_low  = weighted.mean(age_stratified_cfr$cfr_low, population)*100,
+            cfr_high = weighted.mean(age_stratified_cfr$cfr_high, population)*100)
 
-write.csv(age_adjusted_cfr, )
+write.csv(age_adjusted_cfr, tail(.args, 1))
