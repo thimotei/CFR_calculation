@@ -25,9 +25,9 @@ srcs <- head(tail(.args, -2), -2)
 sapply(srcs, source)
 
 # setting baseline level CFR
-CFRRow <- adjustedCFR %>% filter(country_code == dataKey)
-CFRBaseline <- CFRRow %>% select(cfr_mid)
-CFREstimateRange <- c(CFRRow %>% select(cfr_low), CFRRow %>% select(cfr_high))
+CFRRow <- adjustedCFR %>% filter(iso3c == dataKey)
+CFRBaseline <- CFRRow %>% select(cfr_mid) %>% as.numeric()
+CFREstimateRange <- c(CFRRow %>% select(cfr_low), CFRRow %>% select(cfr_high)) %>% as.numeric()
 
 # Set parameters
 mean <- 13

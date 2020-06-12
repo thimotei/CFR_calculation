@@ -89,4 +89,4 @@ age_adjusted_cfr <- age_strat_age_data %>%
             cfr_low  = weighted.mean(age_stratified_cfr$cfr_low, population)*100,
             cfr_high = weighted.mean(age_stratified_cfr$cfr_high, population)*100)
 
-write.csv(age_adjusted_cfr, tail(.args, 1))
+write.csv(age_adjusted_cfr, tail(.args, 1), row.names = FALSE)
