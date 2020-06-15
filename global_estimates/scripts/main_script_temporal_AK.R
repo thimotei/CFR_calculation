@@ -12,7 +12,7 @@ library(mgcv)
 
 # Set paths
 setwd("~/Documents/lshtm/github repos/CFR_calculation/global_estimates/")
-if(grepl(Sys.info()["user"], pattern = "^adamkuchars(ki)?$")){setwd("~/Documents/GitHub/CFR_calculation/global_estimates/")}
+if(grepl(Sys.info()["user"], pattern = "^a(dam)kuchars(ki)?$")){setwd("~/Documents/GitHub/CFR_calculation/global_estimates/")}
 
 # Set parameters
 zmeanHDT <- 13
