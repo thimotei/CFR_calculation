@@ -55,7 +55,7 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   # construct the model
   m <- greta::model(reporting_rate)
   
-  n_chains <- 50
+  n_chains <- 500
   
   # sample initial values for hyperparameters from within their priors
   inits <- replicate(

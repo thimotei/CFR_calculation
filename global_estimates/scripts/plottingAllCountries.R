@@ -24,7 +24,6 @@ ggplot2::ggsave("~/tmp.png",
                 limitsize = FALSE)
 
 
-
 dataPlot <- underReportingData %>% 
   dplyr::filter(date == max(date)) %>% 
   dplyr::mutate(estimate = estimate,

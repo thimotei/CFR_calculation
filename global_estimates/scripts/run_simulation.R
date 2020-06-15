@@ -7,25 +7,27 @@ suppressPackageStartupMessages({
 })
 
 .args <- if (interactive()) c(
- "something.csv", "../temporal/R/cfr_plot_theme.R",
+ "adjusted_cfr.csv", "something.csv", "../temporal/R/cfr_plot_theme.R",
   "../temporal/R/get_plot_data.R", "../temporal/R/plot_country.R",
   "../temporal/R/run_bayesian_model.R", "../temporal/R/scale_cfr_temporal.R", "AFG", "result_AFG.rds"
 ) else commandArgs(trailingOnly = TRUE)
 
 # Load data -----------------------------------------------------
-allDat <- read_csv(.args[1])
+adjustedCFR <- read_csv(.args[1])
+allDat <- read_csv(.args[2])
 dataKey <- tail(.args, 2)[1]
 someDat <- allDat %>% filter(country_code == dataKey)
 
 target <- tail(.args, 1)
 
 #source data processing and plotting scripts
-srcs <- head(tail(.args, -1), -2)
+srcs <- head(tail(.args, -2), -2)
 sapply(srcs, source)
 
 # setting baseline level CFR
-CFRBaseline <- 1.4
-CFREstimateRange <- c(1.2, 1.7)
+CFRRow <- adjustedCFR %>% filter(iso3c == dataKey)
+CFRBaseline <- CFRRow %>% select(cfr_mid) %>% as.numeric()
+CFREstimateRange <- c(CFRRow %>% select(cfr_low), CFRRow %>% select(cfr_high)) %>% as.numeric()
 
 # Set parameters
 mean <- 13

@@ -1,7 +1,5 @@
 here::here() %>% setwd()
 
-rmarkdown::render('CFR_calculation/global_estimates/Rmd/global_cfr_estimates_public.rmd', run_pandoc = FALSE)
-
 EpiNow::copy_report(
   yaml = 'CFR_calculation/global_estimates/man/report-yaml.md',
   report = 'CFR_calculation/global_estimates/Rmd/global_cfr_estimates_public.html',
