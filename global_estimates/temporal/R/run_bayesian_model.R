@@ -19,7 +19,7 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   reporting_kernel <- temporal + intercept
   
   # IID noise kernel for observation overdispersion (clumped death reports)
-  sigma_obs <-greta::normal(0, 0.5, truncation = c(0, Inf))
+  sigma_obs <- greta::normal(0, 0.5, truncation = c(0, Inf))
   observation_kernel <- greta.gp::white(sigma_obs ^ 2)
   
   # combined kernel (marginalises a bunch of parameters for easier sampling)

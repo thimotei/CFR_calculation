@@ -13,6 +13,12 @@ get_plot_data <- function(country_name, data = allTogetherClean, CFRBaseline){
     dplyr::pull(date) %>% 
     min()
 
+  # date where negative death reporting spikes occur
+  reporting_spike <- country_data %>%
+    dplyr::filter(new_deaths < 0) %>%
+    dplyr::filter(date == min(date)) %>%
+    dplyr::pull(date)
+  
   #return adjusted date and reporting_estimate
   cfr <- scale_cfr_temporal(country_data) %>% 
     dplyr::as_tibble() %>% 
@@ -24,6 +30,7 @@ get_plot_data <- function(country_name, data = allTogetherClean, CFRBaseline){
            deaths = country_data$new_deaths,
            cases_known = cum_known_t) %>% 
     dplyr::filter(date >= death_threshold_date) %>% 
+    dplyr::filter(date < reporting_spike) %>% 
     dplyr::select(country, date, date_num, reporting_estimate, deaths, cases_known)
   
   return(cfr)

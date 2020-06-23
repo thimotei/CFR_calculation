@@ -67,7 +67,7 @@ cfr_plots <- list()
 for (country_name in plot_country_names){
   tryCatch({ 
     
-    plot_data <- get_plot_data(country_name = "Germany", CFRBaseline = CFRBaseline)
+    plot_data <- get_plot_data(country_name = plot_country_names, CFRBaseline = CFRBaseline)
     prediction <- run_bayesian_model(plot_data)
     
     saveRDS(prediction, paste0("outputs/fit_data/",country_name, "_fit" ,'.rds'))
@@ -92,6 +92,8 @@ for (country_name in plot_country_names){
   },
   error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
+
+plot_data <- get_plot_data(country_name = "Spain", CFRBaseline = CFRBaseline)
 
 # arranging all of the plots in cfr_plots
 cfr_plot_grid = gridExtra::arrangeGrob(grobs = cfr_plots, ncol = 1)
