@@ -16,8 +16,8 @@ get_plot_data <- function(country_name, data = allTogetherClean, CFRBaseline){
   # date where negative death reporting spikes occur
   reporting_spike <- country_data %>%
     dplyr::filter(new_deaths < 0) %>%
-    dplyr::filter(date == min(date)) %>%
-    dplyr::pull(date)
+    dplyr::pull(date) %>%
+    min()
   
   #return adjusted date and reporting_estimate
   cfr <- scale_cfr_temporal(country_data) %>% 
