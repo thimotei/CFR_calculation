@@ -1,6 +1,11 @@
 # fit a Bayesian GP regression model to deaths and known cases data, integrating
 # over uncertainty in the true CFR, and return the posterior mean and 95% CI
-run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
+# n_inducing controls the complexity of the approximation to the GP - higher is
+# more accurate (but slower) and when n_inducing is the same as the number of
+# time points, the approximation is exact
+# cfr_trend is an optional vector of CFR estimates with an element for each time
+# point in the timeseries
+run_bayesian_model <- function (data, n_inducing = 5, cfr_trend = NULL, verbose = TRUE) {
   
   # only fit to time points where there are known cases
   data <- data %>%
@@ -39,9 +44,19 @@ run_bayesian_model <- function (data, n_inducing = 5, verbose = TRUE) {
   # distribution over plausible baseline CFR values from China study. The 95%
   # CIs are symmetric around the estimate, so we assume it's an approximately
   # Gaussian distribution, truncated to allowable values.
-  true_cfr_mean <- CFRBaseline
+
+  # If a cfr_trend is provided, that is taken as the mean for each time, but
+  # with a constant error (only the intercept is uncertain)
+  true_cfr_mean <- cfr_trend
+  
+  if (is.null(cfr_trend)) {
+    true_cfr_mean <- CFRBaseline
+  }
+  
+  # add temporally constant uncertainty in CFR
   true_cfr_sigma <- mean(abs(CFREstimateRange - CFRBaseline)) / 1.96
-  baseline_cfr_perc <- greta::normal(true_cfr_mean, true_cfr_sigma, truncation = c(0, 100))
+  cfr_error <- greta::normal(0, true_cfr_sigma)
+  baseline_cfr_perc <- true_cfr_mean + cfr_error
   
   # compute the expected number of deaths at each timepoint, given the true CFR,
   # number of reported cases with known outcomes, and reporting rate
