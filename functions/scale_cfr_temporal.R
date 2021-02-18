@@ -1,6 +1,3 @@
-# Define CFR function -----------------------------------------------------
-
-# Function to work out correction CFR
 scale_cfr_temporal <- function(data_1_in, delay_fun = hospitalisation_to_death_truncated){
   
   case_incidence <- data_1_in$new_cases
@@ -21,6 +18,10 @@ scale_cfr_temporal <- function(data_1_in, delay_fun = hospitalisation_to_death_t
   # corrected CFR estimator
   p_tt <- (death_incidence/cumulative_known_t) %>% pmin(.,1)
   
-  data.frame(nCFR = b_tt, cCFR = p_tt, total_deaths = sum(death_incidence), deaths = death_incidence,
-             cum_known_t = round(cumulative_known_t), total_cases = sum(case_incidence))
+  data.frame(nCFR = b_tt, 
+             ccfr = p_tt,
+             total_deaths = sum(death_incidence), 
+             deaths = death_incidence,
+             cum_known_t = round(cumulative_known_t), 
+             total_cases = sum(case_incidence))
 }

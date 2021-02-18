@@ -5,7 +5,12 @@
 # time points, the approximation is exact
 # cfr_trend is an optional vector of CFR estimates with an element for each time
 # point in the timeseries
-run_bayesian_model <- function (data, n_inducing = 5, cfr_trend = NULL, verbose = TRUE) {
+run_bayesian_model <- function (data,
+                                n_inducing = 5,
+                                cfr_baseline = cfr_baseline,
+                                cfr_range = cfr_range,
+                                cfr_trend = NULL,
+                                verbose = TRUE) {
   
   # only fit to time points where there are known cases
   data <- data %>%
@@ -50,13 +55,14 @@ run_bayesian_model <- function (data, n_inducing = 5, cfr_trend = NULL, verbose 
   true_cfr_mean <- cfr_trend
   
   if (is.null(cfr_trend)) {
-    true_cfr_mean <- CFRBaseline
+    true_cfr_mean <- cfr_baseline
   }
   
   # add temporally constant uncertainty in CFR
-  true_cfr_sigma <- mean(abs(CFREstimateRange - CFRBaseline)) / 1.96
+  true_cfr_sigma <- mean(abs(cfr_range - cfr_baseline)) / 1.96
   cfr_error <- greta::normal(0, true_cfr_sigma)
-  baseline_cfr_perc <- true_cfr_mean + cfr_error
+  #baseline_cfr_perc <- true_cfr_mean + cfr_error
+  baseline_cfr_perc <- greta::normal(true_cfr_mean, true_cfr_sigma, truncation = c(0, 100))
   
   # compute the expected number of deaths at each timepoint, given the true CFR,
   # number of reported cases with known outcomes, and reporting rate
@@ -70,7 +76,7 @@ run_bayesian_model <- function (data, n_inducing = 5, cfr_trend = NULL, verbose 
   # construct the model
   m <- greta::model(reporting_rate)
   
-  n_chains <- 500
+  n_chains <- 200
   
   # sample initial values for hyperparameters from within their priors
   inits <- replicate(

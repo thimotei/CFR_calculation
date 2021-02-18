@@ -1,9 +1,10 @@
 #get time varying cfr data for a country
-get_plot_data <- function(country_name, data = allTogetherClean, CFRBaseline){
+cases_known_convolution <- function(iso_arg, data = jhu_data, cfr_baseline){
 
+  mean <- 13
 #filter country data and adjust date
   country_data <- data %>% 
-    dplyr::filter(country == country_name) %>% 
+    dplyr::filter(iso3c == iso_arg) %>% 
     dplyr::mutate(date = date - mean)
   
   #date where cumulative deaths passed 10
@@ -22,7 +23,7 @@ get_plot_data <- function(country_name, data = allTogetherClean, CFRBaseline){
   #return adjusted date and reporting_estimate
   cfr <- scale_cfr_temporal(country_data) %>% 
     dplyr::as_tibble() %>% 
-    dplyr::mutate(reporting_estimate = CFRBaseline/cCFR) %>% 
+    dplyr::mutate(reporting_estimate = cfr_baseline/ccfr) %>% 
     dplyr::mutate(reporting_estimate = pmin(reporting_estimate, 1),
            country = country_data$country,
            date = country_data$date,
