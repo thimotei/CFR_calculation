@@ -1,11 +1,18 @@
 # Code to calculate estimates for under-reporting as of today
 # Author: Tim Russell
 
+#--- SCRIPT IS SUPERSEEDED BY main_script_GP.R
+#--- where the under-ascertainment over time
+#--- estimates are run from
+#--- this script is no longer maintained and 
+#--- subject to errors caused by changes in the
+#--- data reporting
+
 # Set paths
 setwd(here::here())
 
 # Source functions 
-source("global_estimates/R/scale_CFR.R")
+source("global_estimates/R/scale_cfr.R")
 source("global_estimates/R/delay_distributions.R")
 source("global_estimates/R/table_of_estimates.R")
 
