@@ -1,4 +1,4 @@
-case_death_timeseries_function <- function()
+case_death_timeseries_function <- function(regional = FALSE)
 {
     ### downloading and cleaning covid-19 case time-series data from johns hopkins
     ### university database
@@ -18,7 +18,11 @@ case_death_timeseries_function <- function()
         dplyr::mutate(province = dplyr::case_when(is.na(province) == TRUE ~
                                                           "National",
                                                       is.na(province) == FALSE ~ province)) %>%
-        dplyr::mutate(iso3c = countrycode::countrycode(country, 'country.name', 'iso3c')) %>%
+        dplyr::mutate(iso3c = countrycode::countrycode(country,
+                                                       'country.name',
+                                                       'iso3c',
+                      custom_match = c("Micronesia" = "FSM", "Kosovo" = "XXK"))) %>%
+        #dplyr::mutate(iso3c = countrycode::countrycode(country, 'country.name', 'iso3c')) %>%
         dplyr::select(date, country, iso3c, province, cases)
 
 
@@ -40,12 +44,41 @@ case_death_timeseries_function <- function()
         dplyr::mutate(province = dplyr::case_when(is.na(province) == TRUE ~
                                                           "National",
                                                       is.na(province) == FALSE ~ province)) %>%
-        dplyr::mutate(iso3c = countrycode::countrycode(country, 'country.name', 'iso3c')) %>%
+        dplyr::mutate(iso3c = countrycode::countrycode(country,
+                                                       'country.name',
+                                                       'iso3c',
+                      custom_match = c('Micronesia' = 'FSM', "Kosovo" = "XXK"))) %>%
         dplyr::select(date, country, iso3c, province, deaths)
 
-    jhu_data <- jhu_cases_df %>%
-        dplyr::left_join(jhu_deaths_df)
+        jhu_data_conditional <- jhu_cases_df %>%
+            dplyr::left_join(jhu_deaths_df) %>%
+            dplyr::mutate(date = lubridate::mdy(date)) %>%
+            padr::pad() %>%
+            dplyr::rename(new_cases = cases, new_deaths = deaths) %>%
+            dplyr::mutate(new_cases = tidyr::replace_na(new_cases, 0),
+                   new_deaths = tidyr::replace_na(new_deaths, 0)) %>%
+            dplyr::group_by(country) %>%
+            dplyr::mutate(cum_deaths = sum(new_deaths)) %>%
+            dplyr::filter(cum_deaths > 0) %>%
+            dplyr::select(-cum_deaths) %>%
+            dplyr::mutate(new_cases = dplyr::case_when(new_cases < 0 ~ 0,
+                                         new_cases >= 0 ~ new_cases),
+                   new_deaths = dplyr::case_when(new_deaths < 0 ~ 0,
+                                          new_deaths >= 0 ~ new_deaths))
 
+    if(regional == TRUE)
+    {
+        jhu_data <- jhu_data_conditional %>%
+        dplyr::arrange(country, date) 
+    }
+    else
+    {
+        jhu_data <- jhu_data_conditional %>%
+            dplyr::filter(province == "National") %>%
+            dplyr::select(-province) %>%
+            dplyr::arrange(country, date)
+    }
     return(jhu_data)
-
 }
+
+
