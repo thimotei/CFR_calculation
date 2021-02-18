@@ -18,10 +18,10 @@ library(greta.gp)
 setwd(here::here())
 
 #source data processing and plotting scripts
-source('global_estimates/temporal/R/jhu_data_import.R')
-source('global_estimates/temporal/R/scale_cfr_temporal.R')
-source('global_estimates/temporal/R/cases_known_convolution.R')
-source('global_estimates/temporal/R/run_bayesian_model.R')
+source('R/jhu_data_import.R')
+source('R/scale_cfr_temporal.R')
+source('R/cases_known_convolution.R')
+source('R/run_bayesian_model.R')
 
 # setting baseline level CFR
 cfr_baseline <- 1.4
@@ -42,10 +42,14 @@ hospitalisation_to_death_truncated <- function(x) {
 #--- Load and clean data using separate function
 jhu_data <- case_death_timeseries_function()
 
-#--- which country to run the full inference for
 #--- inference is compute and memory heavy
 #--- a HPC is used to run the inference for many countries/regions
+#--- therefore we pick a single country here to run 
+#--- we also only run it for the timeseries from September 2020
+#--- as there are memory allocation issues when running it with a longer
+#--- timeseries on standard computers
 
+#--- choosing which country to run the full inference for
 iso_arg <- "GBR"
 inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
     dplyr::filter(date > "2020-09-01")
