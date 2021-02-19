@@ -54,7 +54,6 @@ iso_arg <- "GBR"
 inference_data <- cases_known_convolution(iso_arg, jhu_data, cfr_baseline) %>%
     dplyr::filter(date > "2020-09-01")
 
-#plot_data <- get_plot_data(country_name = plot_country_names, cfr_baseline = cfr_baseline)
 prediction <- run_bayesian_model(inference_data,
                                  n_inducing = 5,
                                  cfr_baseline = cfr_baseline,
